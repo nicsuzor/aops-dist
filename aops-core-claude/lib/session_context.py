@@ -16,12 +16,10 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from lib.session_reader import (
-    _extract_and_expand_prompts,
     _is_system_injected_context,
     parse_todowrite_state,
 )
@@ -112,9 +110,7 @@ def extract_session_context(
         return context
 
     try:
-        return _extract_session_context_impl(
-            transcript_path, context, max_follow_ups
-        )
+        return _extract_session_context_impl(transcript_path, context, max_follow_ups)
     except Exception:
         # Fail gracefully - return minimal context
         return context

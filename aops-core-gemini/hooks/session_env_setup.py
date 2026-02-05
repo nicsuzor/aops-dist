@@ -9,7 +9,7 @@ persisted for the duration of the Claude Code session using CLAUDE_ENV_FILE.
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Optional
 
 # Ensure aops-core is in path for imports
 HOOK_DIR = Path(__file__).parent
@@ -47,7 +47,7 @@ def persist_env_var(name: str, value: str) -> None:
 def run_session_env_setup(ctx: HookContext) -> Optional[GateResult]:
     """
     Logic from session_env_setup.sh migrated to Python.
-    
+
     Sets:
     - CLAUDE_SESSION_ID
     - PYTHONPATH (includes aops-core)
@@ -93,6 +93,5 @@ def run_session_env_setup(ctx: HookContext) -> Optional[GateResult]:
         persist_env_var("PATH", f"{current_path}:./node_modules/.bin")
 
     return GateResult(
-        verdict=GateVerdict.ALLOW,
-        metadata={"source": "session_env_setup"}
+        verdict=GateVerdict.ALLOW, metadata={"source": "session_env_setup"}
     )

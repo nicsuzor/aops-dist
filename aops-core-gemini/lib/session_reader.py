@@ -15,13 +15,12 @@ Used by:
 from __future__ import annotations
 
 import glob
-import json
 import re
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from lib.transcript_parser import (
-    Entry,
     SessionInfo,
     SessionProcessor,
     SessionState,
@@ -175,7 +174,7 @@ def _extract_questions_from_text(text: str) -> list[str]:
     questions = []
     # Look for text ending with ? - capture the full sentence leading up to it
     # Using regex to find sentence-like patterns ending with ?
-    pattern = r'[^.!?\n]*\?'
+    pattern = r"[^.!?\n]*\?"
     matches = re.findall(pattern, text)
 
     for match in matches:
@@ -203,15 +202,19 @@ def _extract_and_expand_prompts(turns: list, max_turns: int) -> list[str]:
 
         if not text or _is_system_injected_context(text):
             continue
-        
+
         command_name = None
         args = ""
 
         # Case 1: XML-wrapped command
-        command_name_match = re.search(r"<command-name>(.*?)</command-name>", text, re.DOTALL)
+        command_name_match = re.search(
+            r"<command-name>(.*?)</command-name>", text, re.DOTALL
+        )
         if command_name_match:
             command_name = command_name_match.group(1).strip()
-            args_match = re.search(r"<command-args>(.*?)</command-args>", text, re.DOTALL)
+            args_match = re.search(
+                r"<command-args>(.*?)</command-args>", text, re.DOTALL
+            )
             if args_match:
                 args = f" {args_match.group(1).strip()}"
         # Case 2: Simple command prefix
@@ -391,7 +394,7 @@ def _extract_router_context_impl(transcript_path: Path, max_turns: int) -> str:
         for i, question in enumerate(agent_questions, 1):
             # Ensure question ends with ? for clarity
             q = question if question.endswith("?") else question + "?"
-            lines.append(f'{i}. {q}')
+            lines.append(f"{i}. {q}")
         lines.append("")
 
     if agent_responses:
@@ -522,32 +525,6 @@ def _extract_gate_context_impl(
     if "conversation" in include:
         # Generate unified conversation log (ns-52v)
         # Returns list of strings [User]: ..., [Agent]: ...
-        log_lines: list[str] = []
-
-        # Use reversed turns to efficiently get last N
-        count = 0
-        for turn in reversed(turns):
-            if count >= max_turns:
-                break
-
-            turn_lines = []
-
-            # Assistant part (happens after user message in turn)
-            assistant_sequence = (
-                turn.get("assistant_sequence")
-                if isinstance(turn, dict)
-                else turn.assistant_sequence
-            )
-            if assistant_sequence:
-                for item in reversed(
-                    assistant_sequence
-                ):  # Reversed again to push to front of turn lines? No.
-                    # We want chronological order within the turn.
-                    pass
-
-            # Actually easier to process chronological turns and then slice.
-            pass
-
         # Linear pass chronological
         chronological_lines = []
         for turn in turns:
@@ -703,7 +680,6 @@ def load_skill_scope(skill_name: str) -> str | None:
     Returns:
         Brief description of what the skill authorizes, or None if not found.
     """
-    import os
 
     aops_root = Path(__file__).parent.parent.parent
 
@@ -744,7 +720,7 @@ def _extract_skill_scope_from_file(path: Path) -> str | None:
             frontmatter = parts[1]
             for line in frontmatter.split("\n"):
                 if line.startswith("description:"):
-                    desc = line[len("description:") :].strip().strip('"\'')
+                    desc = line[len("description:") :].strip().strip("\"'")
                     lines.append(f"**Purpose**: {desc}")
                     break
 
@@ -1033,8 +1009,7 @@ def find_sessions(
 
                 # Get modification time from most recently modified .md file
                 mtime = max(
-                    datetime.fromtimestamp(f.stat().st_mtime, tz=UTC)
-                    for f in md_files
+                    datetime.fromtimestamp(f.stat().st_mtime, tz=UTC) for f in md_files
                 )
 
                 # Filter by time if specified

@@ -12,7 +12,6 @@ Usage:
 
 import argparse
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -61,7 +60,9 @@ def main():
         # We need to construct path manually or use library helper (but helper returns .json)
         # We want .debug.txt alongside where the json would be
         try:
-            target_path = get_insights_file_path(args.date, args.session_id, project=args.project)
+            target_path = get_insights_file_path(
+                args.date, args.session_id, project=args.project
+            )
             # E.g. .../YYYY-MM-DD-hash.json -> .../YYYY-MM-DD-hash.debug.txt
             debug_path = target_path.parent / f"{args.date}-{args.session_id}.debug.txt"
 

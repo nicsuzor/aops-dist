@@ -10,7 +10,6 @@ Exit codes:
     0: Always (JSON output determines allow/deny via permissionDecision field)
 """
 
-import json
 import re
 import sys
 from pathlib import Path
@@ -25,7 +24,6 @@ DESTRUCTIVE_GIT_PATTERNS = [
     r"git\s+checkout\s+--\s+\.",
     r"git\s+stash\s+drop",
 ]
-
 
 
 def count_prose_lines(content: str) -> int:
@@ -53,9 +51,13 @@ def validate_minimal_documentation(
         return None
 
     if "file_path" not in args:
-        raise ValueError("Write tool args requires 'file_path' parameter (P#8: fail-fast)")
+        raise ValueError(
+            "Write tool args requires 'file_path' parameter (P#8: fail-fast)"
+        )
     if "content" not in args:
-        raise ValueError("Write tool args requires 'content' parameter (P#8: fail-fast)")
+        raise ValueError(
+            "Write tool args requires 'content' parameter (P#8: fail-fast)"
+        )
     file_path = args["file_path"]
     content = args["content"]
 
@@ -126,8 +128,8 @@ def validate_protect_artifacts(
     if local_config.exists():
         try:
             protected_paths = [
-                line.strip() 
-                for line in local_config.read_text().splitlines() 
+                line.strip()
+                for line in local_config.read_text().splitlines()
                 if line.strip() and not line.startswith("#")
             ]
         except Exception as e:
