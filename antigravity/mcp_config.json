@@ -5,7 +5,7 @@
       "args": [
         "run",
         "--directory",
-        "${extensionPath}/aops-core-gemini",
+        "${extensionPath}",
         "python",
         "mcp_servers/tasks_server.py"
       ],
