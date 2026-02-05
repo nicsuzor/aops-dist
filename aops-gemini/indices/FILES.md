@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 278
+Total files: 277
 
 ## File Tree
 
@@ -48,14 +48,13 @@ hooks/autocommit_state.py
 hooks/command_intercept.py
 hooks/data/reminders.txt
 hooks/fail_fast_watchdog.py
+hooks/gate_config.py
 hooks/gate_registry.py
-hooks/gates.py
 hooks/generate_transcript.py
 hooks/hooks.json
 hooks/internal_models.py
 hooks/ntfy_notifier.py
 hooks/policy_enforcer.py
-hooks/reflection_check.py
 hooks/router.py
 hooks/schemas.py
 hooks/session_end_commit_check.py
