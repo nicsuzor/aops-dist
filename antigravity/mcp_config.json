@@ -1,17 +1,11 @@
 {
   "mcpServers": {
-    "memory": {
-      "headers": {
-        "Authorization": "Bearer $MCP_MEMORY_API_KEY"
-      },
-      "serverUrl": "http://services.stoat-musical.ts.net:8026/mcp"
-    },
     "task_manager": {
       "command": "uv",
       "args": [
         "run",
         "--directory",
-        "${extensionPath}",
+        "${extensionPath}/aops-core-gemini",
         "python",
         "mcp_servers/tasks_server.py"
       ],
