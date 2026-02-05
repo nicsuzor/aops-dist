@@ -2,7 +2,7 @@
   "mcpServers": {
     "memory": {
       "headers": {
-        "Authorization": "Bearer ${MCP_MEMORY_API_KEY}"
+        "Authorization": "Bearer $MCP_MEMORY_API_KEY"
       },
       "serverUrl": "http://services.stoat-musical.ts.net:8026/mcp"
     },

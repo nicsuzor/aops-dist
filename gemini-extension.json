@@ -1,6 +1,6 @@
 {
   "name": "aops-core",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "AcademicOps Framework Extension for Gemini CLI - skills, agents, hooks, and tools for research workflow automation",
   "settings": [
     {
@@ -28,7 +28,7 @@
     "memory": {
       "url": "http://services.stoat-musical.ts.net:8026/mcp",
       "headers": {
-        "Authorization": "Bearer ${MCP_MEMORY_API_KEY}"
+        "Authorization": "Bearer $MCP_MEMORY_API_KEY"
       }
     }
   }

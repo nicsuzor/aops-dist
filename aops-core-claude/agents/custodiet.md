@@ -2,10 +2,7 @@
 name: custodiet
 description: Ultra vires detector - catches agents acting beyond granted authority
 model: haiku
-tools:
-  - read_file
-  - write_file
-  - run_shell_command
+tools: Read, Write, Bash
 ---
 
 # Custodiet Agent

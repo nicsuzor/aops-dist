@@ -3,15 +3,8 @@ name: effectual-planner
 description: Strategic planning under uncertainty (goals, projects, knowledge-building).
   NOT for implementation plans.
 model: opus
-tools:
-  - read_file
-  - write_file
-  - glob
-  - mcp__task_manager__create_task
-  - mcp__task_manager__get_task
-  - mcp__task_manager__update_task
-  - mcp__task_manager__list_tasks
-  - mcp__task_manager__search_tasks
+tools: Read, Write, Glob, mcp__task_manager__create_task, mcp__task_manager__get_task,
+  mcp__task_manager__update_task, mcp__task_manager__list_tasks, mcp__task_manager__search_tasks
 ---
 
 # Effectual Planning Agent
