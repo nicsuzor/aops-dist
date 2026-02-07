@@ -1,6 +1,6 @@
 {
   "name": "aops-core",
-  "version": "0.1.19",
+  "version": "0.1.20",
   "description": "Core academicOps framework - skills, agents, hooks, and tools for research workflow automation",
   "author": {
     "name": "Nicolas Suzor"
@@ -12,7 +12,6 @@
     "framework",
     "workflow"
   ],
-  "agents": "./agents/",
   "hooks": [],
   "mcpServers": "./.mcp.json"
 }
