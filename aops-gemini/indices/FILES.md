@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 286
+Total files: 282
 
 ## File Tree
 
@@ -142,14 +142,11 @@ skills/audit/scripts/find_orphans.py
 skills/audit/workflows/session-effectiveness.md
 skills/convert-to-md/SKILL.md
 skills/convert-to-md/scripts/pdf2md.py
-skills/critic/SKILL.md
-skills/custodiet/SKILL.md
 skills/daily/SKILL.md
 skills/daily/instructions/sync-workflow.md
 skills/daily/references/note-template.md
 skills/decision-apply/SKILL.md
 skills/decision-extract/SKILL.md
-skills/effectual-planner/SKILL.md
 skills/email-triage/SKILL.md
 skills/excalidraw/SKILL.md
 skills/excalidraw/libraries/awesome-icons.excalidrawlib
@@ -234,7 +231,6 @@ skills/pdf/assets/fonts/RobotoMonoNerdFont-Italic.ttf
 skills/pdf/assets/fonts/RobotoMonoNerdFont-Regular.ttf
 skills/pdf/assets/letter-style.css
 skills/pdf/scripts/generate_pdf.py
-skills/prompt-hydrator/SKILL.md
 skills/python-dev/SKILL.md
 skills/python-dev/references/bigquery.md
 skills/python-dev/references/code-quality.md
