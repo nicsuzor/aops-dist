@@ -13,6 +13,10 @@ from typing import Any, Dict, Optional, Tuple
 
 from lib.gate_model import GateResult, GateVerdict
 from lib.paths import get_ntfy_config
+from hooks.schemas import HookContext
+
+# Backwards compatibility alias - tests use GateContext
+GateContext = HookContext
 
 # Adjust imports to work within the aops-core environment
 # These imports are REQUIRED for gate functionality - fail explicitly if missing
@@ -163,7 +167,6 @@ def _is_safe_temp_path(file_path: str | None) -> bool:
             return True
 
     return False
-
 
 
 def _is_actually_destructive(tool_name: str, tool_input: Dict[str, Any]) -> bool:
