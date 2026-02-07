@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 277
+Total files: 278
 
 ## File Tree
 
@@ -285,6 +285,7 @@ workflows/merge-conflict.md
 workflows/peer-review.md
 workflows/prove-feature.md
 workflows/qa-design.md
+workflows/qa-test.md
 workflows/qa.md
 workflows/reference-letter.md
 workflows/simple-question.md
