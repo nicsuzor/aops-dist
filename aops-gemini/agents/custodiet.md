@@ -1,11 +1,14 @@
 ---
 name: custodiet
 description: Ultra vires detector - catches agents acting beyond granted authority
-model: haiku
+model: gemini-2.5-flash
 tools:
-  - read_file
-  - write_file
-  - run_shell_command
+- read_file
+- write_file
+- run_shell_command
+kind: local
+max_turns: 15
+timeout_mins: 5
 ---
 
 # Custodiet Agent

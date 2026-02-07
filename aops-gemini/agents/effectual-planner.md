@@ -2,11 +2,14 @@
 name: effectual-planner
 description: Strategic planning under uncertainty (goals, projects, knowledge-building).
   NOT for implementation plans.
-model: opus
+model: gemini-2.5-pro
 tools:
 - read_file
 - write_file
 - glob
+kind: local
+max_turns: 15
+timeout_mins: 5
 ---
 
 # Effectual Planning Agent

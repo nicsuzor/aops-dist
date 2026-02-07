@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 278
+Total files: 280
 
 ## File Tree
 
@@ -48,6 +48,7 @@ hooks/data/reminders.txt
 hooks/fail_fast_watchdog.py
 hooks/gate_config.py
 hooks/gate_registry.py
+hooks/gates.py
 hooks/generate_transcript.py
 hooks/hooks.json
 hooks/internal_models.py
@@ -59,6 +60,7 @@ hooks/session_end_commit_check.py
 hooks/session_env_setup.py
 hooks/task_binding.py
 hooks/templates/README.md
+hooks/templates/custodiet-audit.md
 hooks/templates/custodiet-context.md
 hooks/templates/custodiet-instruction.md
 hooks/templates/fail-fast-reminder.md

@@ -1,10 +1,13 @@
 ---
 name: qa
 description: Independent end-to-end verification before completion
-model: opus
+model: gemini-2.5-pro
 tools:
-  - read_file
-  - run_shell_command
+- read_file
+- run_shell_command
+kind: local
+max_turns: 15
+timeout_mins: 5
 ---
 
 # QA Agent

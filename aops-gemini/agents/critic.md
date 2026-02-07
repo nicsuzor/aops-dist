@@ -1,9 +1,12 @@
 ---
 name: critic
 description: Second-opinion review of plans and conclusions
-model: opus
+model: gemini-2.5-pro
 tools:
-  - read_file
+- read_file
+kind: local
+max_turns: 15
+timeout_mins: 5
 ---
 
 # Critic Agent

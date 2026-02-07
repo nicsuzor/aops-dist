@@ -2,10 +2,13 @@
 name: prompt-hydrator
 description: Transform terse prompts into execution plans with scope detection, task
   routing, and deferred work capture
-model: haiku
+model: gemini-2.5-flash
 tools:
 - read_file
 - activate_skill
+kind: local
+max_turns: 15
+timeout_mins: 5
 ---
 
 # Prompt Hydrator Agent
