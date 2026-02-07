@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 285
+Total files: 286
 
 ## File Tree
 
@@ -203,6 +203,7 @@ skills/framework/workflows/05-feature-development.md
 skills/framework/workflows/06-develop-specification.md
 skills/framework/workflows/07-learning-log.md
 skills/framework/workflows/08-decision-briefing.md
+skills/framework/workflows/09-session-hook-forensics.md
 skills/garden/SKILL.md
 skills/garden/scripts/lint_frontmatter.py
 skills/handover/SKILL.md
