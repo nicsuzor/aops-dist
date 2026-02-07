@@ -9,8 +9,11 @@
     },
     "task_manager": {
       "type": "stdio",
-      "command": "uv",
+      "command": "env",
       "args": [
+        "-u",
+        "VIRTUAL_ENV",
+        "uv",
         "run",
         "--directory",
         "${CLAUDE_PLUGIN_ROOT}",

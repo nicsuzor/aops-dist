@@ -18,34 +18,38 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from lib.file_index import get_formatted_relevant_paths
 from lib.hook_utils import (
     cleanup_old_temp_files as _cleanup_temp,
+)
+from lib.hook_utils import (
     get_hook_temp_dir,
+)
+from lib.hook_utils import (
     write_temp_file as _write_temp,
 )
 from lib.paths import (
-    get_plugin_root,
     get_aops_root,
-    get_data_root,
-    get_skills_dir,
-    get_hooks_dir,
     get_commands_dir,
-    get_tests_dir,
     get_config_dir,
-    get_workflows_dir,
-    get_indices_dir,
-    get_sessions_dir,
-    get_projects_dir,
-    get_logs_dir,
     get_context_dir,
+    get_data_root,
     get_goals_dir,
+    get_hooks_dir,
+    get_indices_dir,
+    get_logs_dir,
+    get_plugin_root,
+    get_projects_dir,
+    get_sessions_dir,
+    get_skills_dir,
+    get_tests_dir,
+    get_workflows_dir,
 )
-from lib.file_index import get_formatted_relevant_paths
 from lib.session_reader import extract_router_context
 from lib.session_state import (
+    clear_hydration_pending,
     set_hydration_pending,
     set_hydration_temp_path,
-    clear_hydration_pending,
 )
 from lib.template_loader import load_template
 
@@ -56,6 +60,18 @@ INSTRUCTION_TEMPLATE_FILE = HOOK_DIR / "templates" / "prompt-hydration-instructi
 
 # Temp directory category (matches hydration_gate.py)
 TEMP_CATEGORY = "hydrator"
+
+# Environment variables to display in hydrator context
+MONITORED_ENV_VARS = (
+    "AOPS",
+    "ACA_DATA",
+    "POLECAT_HOME",
+    "NTFY_TOPIC",
+    "HYDRATION_GATE_MODE",
+    "CUSTODIET_MODE",
+    "TASK_GATE_MODE",
+    "CLAUDE_SESSION_ID",
+)
 
 # Debug log - opt-in via AOPS_DEBUG_LOG environment variable
 # If not set, debug logging is disabled (no-op)
@@ -144,41 +160,46 @@ def load_framework_paths() -> str:
         return f"(Error gathering framework paths: {e})"
 
 
+def load_tools_index() -> str:
+    """Load TOOLS.md for hydrator context.
+
+    Pre-loads curated tool reference so hydrator can route work effectively.
+    Returns content after frontmatter separator.
+    """
+    plugin_root = get_plugin_root()
+    tools_path = plugin_root / "TOOLS.md"
+
+    if not tools_path.exists():
+        return "(TOOLS.md not found)"
+
+    content = tools_path.read_text()
+
+    # Skip frontmatter if present
+    if content.startswith("---"):
+        parts = content.split("---", 2)
+        if len(parts) >= 3:
+            return parts[2].strip()
+
+    return content.strip()
+
+
+# Alias for backwards compatibility with template placeholder name
 def load_mcp_tools_context() -> str:
-    """List available MCP tools and servers."""
-    # These are the known servers in the framework
-    servers = {
-        "task_manager": "Manages the hierarchical task system (create, update, complete, decompose)",
-        "memory": "Semantic memory retrieval and recall",
-        "outlook": "Integration with Outlook calendar and messages",
-    }
+    """Load tools index (alias for load_tools_index).
 
-    lines = ["## Available MCP Servers", ""]
-    lines.append("| Server | Description |")
-    lines.append("|--------|-------------|")
-    for name, desc in servers.items():
-        lines.append(f"| {name} | {desc} |")
-
-    return "\n".join(lines)
+    Kept for backwards compatibility with existing template placeholder.
+    """
+    return load_tools_index()
 
 
 def load_environment_variables_context() -> str:
     """List relevant environment variables."""
-    vars_to_check = [
-        "AOPS",
-        "ACA_DATA",
-        "POLECAT_HOME",
-        "NTFY_TOPIC",
-        "HYDRATION_GATE_MODE",
-        "CUSTODIET_MODE",
-        "TASK_GATE_MODE",
-        "CLAUDE_SESSION_ID",
-    ]
-
+    # <!-- NS: no magic literals. -->
+    # <!-- @claude 2026-02-07: Fixed. Extracted to MONITORED_ENV_VARS constant at module level. -->
     lines = ["## Environment Variables", ""]
     lines.append("| Variable | Value |")
     lines.append("|----------|-------|")
-    for var in vars_to_check:
+    for var in MONITORED_ENV_VARS:
         value = os.environ.get(var, "(not set)")
         lines.append(f"| {var} | `{value}` |")
 
@@ -221,6 +242,24 @@ def _strip_frontmatter(content: str) -> str:
         if len(parts) >= 3:
             return parts[2].strip()
     return content.strip()
+
+
+def _load_framework_file(filename: str) -> str:
+    """Load a framework markdown file, stripping frontmatter.
+
+    Args:
+        filename: Name of file in plugin root (e.g., "AXIOMS.md")
+
+    Returns:
+        File content with frontmatter stripped.
+
+    Raises:
+        FileNotFoundError: If file doesn't exist (fail-fast per P#8)
+    """
+    plugin_root = get_plugin_root()
+    filepath = plugin_root / filename
+    content = filepath.read_text()
+    return _strip_frontmatter(content)
 
 
 def _load_project_workflows(prompt: str = "") -> str:
@@ -393,41 +432,18 @@ def load_axioms() -> str:
     Pre-loads axioms so hydrator can select relevant principles.
     Returns content after frontmatter separator.
     """
-    plugin_root = get_plugin_root()
-    axioms_path = plugin_root / "AXIOMS.md"
-
-    # Fail fast, raises if file doesn't exist
-    content = axioms_path.read_text()
-
-    # Skip frontmatter if present
-    if content.startswith("---"):
-        parts = content.split("---", 2)
-        if len(parts) >= 3:
-            return parts[2].strip()
-
-    return content.strip()
+    return _load_framework_file("AXIOMS.md")
 
 
 # <!-- NS: these repetitive functions should be refactored. -->
+# <!-- @claude 2026-02-07: Fixed. Extracted common pattern to _load_framework_file() helper. -->
 def load_heuristics() -> str:
     """Load HEURISTICS.md for hydrator context.
 
     Pre-loads heuristics so hydrator doesn't need to Read() at runtime.
     Returns content after frontmatter separator.
     """
-    plugin_root = get_plugin_root()
-    heuristics_path = plugin_root / "HEURISTICS.md"
-
-    # Fail fast, raises if file doesn't exist
-    content = heuristics_path.read_text()
-
-    # Skip frontmatter if present
-    if content.startswith("---"):
-        parts = content.split("---", 2)
-        if len(parts) >= 3:
-            return parts[2].strip()
-
-    return content.strip()
+    return _load_framework_file("HEURISTICS.md")
 
 
 def load_skills_index() -> str:
@@ -436,19 +452,7 @@ def load_skills_index() -> str:
     Pre-loads skills index so hydrator can immediately recognize skill invocations
     without needing to search memory. Returns content after frontmatter separator.
     """
-    plugin_root = get_plugin_root()
-    skills_path = plugin_root / "SKILLS.md"
-
-    # Fail fast, raises if file doesn't exist
-    content = skills_path.read_text()
-
-    # Skip frontmatter if present
-    if content.startswith("---"):
-        parts = content.split("---", 2)
-        if len(parts) >= 3:
-            return parts[2].strip()
-
-    return content.strip()
+    return _load_framework_file("SKILLS.md")
 
 
 def get_task_work_state() -> str:

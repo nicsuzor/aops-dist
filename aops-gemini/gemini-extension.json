@@ -1,6 +1,6 @@
 {
   "name": "aops-core",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "AcademicOps Framework Extension for Gemini CLI - skills, agents, hooks, and tools for research workflow automation",
   "contextFileName": "GEMINI.md",
   "settings": [
@@ -13,8 +13,11 @@
   ],
   "mcpServers": {
     "task_manager": {
-      "command": "uv",
+      "command": "env",
       "args": [
+        "-u",
+        "VIRTUAL_ENV",
+        "uv",
         "run",
         "--directory",
         "${extensionPath}",

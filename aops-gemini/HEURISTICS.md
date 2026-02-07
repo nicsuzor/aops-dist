@@ -447,6 +447,8 @@ description: Working hypotheses validated by evidence.
 
 **Handover Epic Context Corollary**: When completing a task that has a parent epic, handover MUST report: (1) remaining work on the epic, (2) whether epic is now ready for qualitative verification. This ensures visibility into feature completion state, not just subtask completion.
 
+**Monitoring Task Corollary**: For tasks involving monitoring or observation ("assess", "observe", "watch", "evaluate how X is going"), acceptance criteria must include OUTCOME verification, not just INITIATION verification. Starting a process ≠ evaluating its results. Criteria must include: observed completions, measured performance, or evaluated quality—not just "process started successfully."
+
 **Derivation**: P#31 (Acceptance Criteria Own Success) and P#74 (User System Expertise) establish user as authority on success. This heuristic operationalizes: verify understanding of user intent BEFORE building, not just validate technical correctness after.
 
 ---
@@ -545,4 +547,58 @@ mcp__plugin_aops-tools_task_manager__get_task(id="...")
 
 **Derivation**: `uv` manages the virtual environment and dependencies. System python lacks the project context. `uv run` guarantees the correct environment is active without manual activation steps.
 
+---
+
+## Batch Completion Requires Worker Completion (P#94)
+
+**Statement**: A batch task is not complete until all spawned workers have finished. "Fire-and-forget" means don't BLOCK waiting; it does NOT mean "declare complete after spawning."
+
+**Corollaries**:
+- Spawning workers is the START of batch work, not completion
+- Before completing a batch task, poll worker status via MCP `get_task` calls
+- If session must end with workers still running: set task status to `waiting`, not `done`
+- Handover with active workers requires `outcome: partial` and explicit "delegated work in progress" note
+- Workers updating task status to `done` is the signal for batch completion, not spawn confirmation
+
+**Signs you're violating this**:
+- Completing batch task immediately after spawning workers
+- Using "fire-and-forget" as justification for marking work complete
+- Handover claiming completion while background agents still running
+
+**Example (correct pattern)**:
+```python
+# Spawn workers (don't block)
+for task in batch:
+    Task(subagent_type="worker", prompt=task, run_in_background=True)
+
+# Continue other work while workers run...
+
+# Before completing batch task, check worker status
+for worker_task_id in spawned_ids:
+    status = mcp__task_manager__get_task(id=worker_task_id)
+    if status["task"]["status"] != "done":
+        # Workers still running - cannot complete batch
+        mcp__task_manager__update_task(id=batch_task_id, status="waiting")
+        return  # Don't mark complete
+
+# All workers done - NOW complete the batch task
+mcp__task_manager__complete_task(id=batch_task_id)
+```
+
+**Derivation**: P#86 (Background Notifications Unreliable) correctly recommends not blocking on notifications. But "don't block" was over-applied to mean "declare done immediately." The correct interpretation: continue other work while monitoring, but verify completion before declaring the batch task done. Premature completion violates P#31 (Acceptance Criteria Own Success) - the batch task's success criteria is "all work processed," not "all work delegated."
+
+---
+
+## Subagent Verdicts Are Binding (P#95)
+
+**Statement**: When a subagent (critic, custodiet, qa) returns a HALT or REVISE verdict, the main agent MUST stop and address the issue. Proceeding after a blocking verdict is a protocol violation.
+
+**Corollaries**:
+- "HALT" from critic → don't proceed with plan, fix the blocking issue first
+- "HALT" from custodiet → don't proceed with action, address the violation
+- "REVISE" from qa → fix identified issues before claiming complete
+- Agent cannot substitute its own judgment for a failed subagent review
+- If subagent fails to execute (file not found, tool error), that is also a HALT condition
+
+**Derivation**: P#9 (Fail-Fast Agents) requires stopping when tools fail. Subagents are tools. Their failure verdicts must be respected - the agent cannot self-certify when external review is mandated.
 

@@ -22,7 +22,7 @@ import uuid
 from collections import deque
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 
 # --- Path Setup ---
@@ -52,6 +52,7 @@ try:
     from hooks.unified_logger import log_hook_event
     from lib.gate_model import GateResult
     from lib.session_paths import get_pid_session_map_path, get_session_status_dir
+    from lib import session_state
 except ImportError as e:
     # Fail fast if schemas missing
     print(f"CRITICAL: Failed to import: {e}", file=sys.stderr)
@@ -74,6 +75,46 @@ GEMINI_EVENT_MAP = {
 
 # Gate configuration is now in gate_config.py
 # GATE_EXECUTION_ORDER and MAIN_AGENT_ONLY_GATES imported from there
+
+
+# --- Gate Status Display ---
+
+
+def format_gate_status_icons(session_id: str) -> str:
+    """Format current gate statuses as a compact icon line.
+
+    Returns a short, non-intrusive string showing gate states:
+    📌 = Task, 💧 = Hydration, 🤝 = Handover
+    ✓ = passed, ✗ = not passed
+
+    Args:
+        session_id: Session ID to check gates for
+
+    Returns:
+        Formatted status line like "[📌✓ 💧✓ 🤝✗]"
+
+    Raises:
+        ValueError: If session state cannot be loaded (fail fast)
+    """
+    state = session_state.load_session_state(session_id)
+    if not state:
+        raise ValueError(f"Cannot load session state for {session_id}")
+
+    state_data = state.get("state", {})
+
+    # Task bound status
+    task_bound = state.get("main_agent", {}).get("current_task") is not None
+    task_icon = "✓" if task_bound else "✗"
+
+    # Hydration status (not pending = passed)
+    hydration_pending = state_data.get("hydration_pending", True)
+    hydration_icon = "✓" if not hydration_pending else "✗"
+
+    # Handover status (default False = conservative assumption if key missing)
+    handover_ok = state_data.get("handover_skill_invoked", False)
+    handover_icon = "✓" if handover_ok else "✗"
+
+    return f"[📌{task_icon} 💧{hydration_icon} 🤝{handover_icon}]"
 
 
 # --- Session Management ---
@@ -118,7 +159,7 @@ class HookRouter:
     def __init__(self):
         self.session_data = get_session_data()
         self._execution_timestamps = deque(maxlen=20)  # Store last 20 timestamps
-        self._MAX_CALLS_PER_WINDOW = 15
+        self._MAX_CALLS_PER_WINDOW = 35
         self._WINDOW_SECONDS = 5.0
 
     def _check_for_loops(self, session_id: str):
@@ -185,6 +226,27 @@ class HookRouter:
             # Don't let loop detection failure block the hook
             print(f"WARNING: Loop detection failed: {e}", file=sys.stderr)
 
+    @staticmethod
+    def _normalize_json_field(value: Any) -> Any:
+        """Normalize a field that may be a JSON string to its parsed form.
+
+        Gemini CLI sometimes passes tool_input and tool_result as JSON strings
+        instead of dicts. This centralizes parsing so downstream gates don't need
+        defensive json.loads calls.
+
+        Args:
+            value: Value that may be a JSON string or already-parsed dict/list
+
+        Returns:
+            Parsed value if it was a JSON string, otherwise unchanged
+        """
+        if isinstance(value, str):
+            try:
+                return json.loads(value)
+            except json.JSONDecodeError:
+                return value
+        return value
+
     def normalize_input(
         self, raw_input: Dict[str, Any], gemini_event: Optional[str] = None
     ) -> HookContext:
@@ -224,6 +286,27 @@ class HookRouter:
         if hook_event == "SessionStart":
             persist_session_data({"session_id": session_id})
 
+        # 4. Normalize JSON string fields from Gemini
+        # Gemini sometimes passes tool_input/tool_result as JSON strings
+        tool_input = self._normalize_json_field(raw_input.get("tool_input", {}))
+        if not isinstance(tool_input, dict):
+            tool_input = {}
+
+        # Normalize tool_result and toolResult in raw_input (for PostToolUse/SubagentStop)
+        normalized_raw = raw_input.copy()
+        if "tool_result" in normalized_raw:
+            normalized_raw["tool_result"] = self._normalize_json_field(
+                normalized_raw["tool_result"]
+            )
+        if "toolResult" in normalized_raw:
+            normalized_raw["toolResult"] = self._normalize_json_field(
+                normalized_raw["toolResult"]
+            )
+        if "subagent_result" in normalized_raw:
+            normalized_raw["subagent_result"] = self._normalize_json_field(
+                normalized_raw["subagent_result"]
+            )
+
         return HookContext(
             session_id=session_id,
             hook_event=hook_event,
@@ -231,10 +314,10 @@ class HookRouter:
             slug=raw_input.get("slug"),
             is_sidechain=raw_input.get("isSidechain"),
             tool_name=raw_input.get("tool_name"),
-            tool_input=raw_input.get("tool_input", {}),
+            tool_input=tool_input,
             transcript_path=transcript_path,
             cwd=raw_input.get("cwd"),
-            raw_input=raw_input,
+            raw_input=normalized_raw,
         )
 
     def execute_hooks(self, ctx: HookContext) -> CanonicalHookOutput:
@@ -285,6 +368,17 @@ class HookRouter:
                 merged_result.metadata.setdefault("tracebacks", []).append(
                     traceback.format_exc()
                 )
+
+        # Append gate status icons to system message (non-intrusive display)
+        # Function raises on failure (fail fast), but we catch here to avoid blocking hooks
+        try:
+            gate_status = format_gate_status_icons(ctx.session_id)
+            if merged_result.system_message:
+                merged_result.system_message = f"{merged_result.system_message} {gate_status}"
+            else:
+                merged_result.system_message = gate_status
+        except Exception as e:
+            print(f"WARNING: Gate status icons failed: {e}", file=sys.stderr)
 
         # Log hook event with output AFTER all gates complete
         # We already have a normalized context 'ctx' and result 'merged_result'

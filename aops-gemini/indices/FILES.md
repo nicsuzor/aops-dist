@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 277
+Total files: 282
 
 ## File Tree
 
@@ -143,6 +143,7 @@ skills/convert-to-md/scripts/pdf2md.py
 skills/critic/SKILL.md
 skills/custodiet/SKILL.md
 skills/daily/SKILL.md
+skills/daily/instructions/sync-workflow.md
 skills/daily/references/note-template.md
 skills/decision-apply/SKILL.md
 skills/decision-extract/SKILL.md
@@ -210,6 +211,7 @@ skills/health-check/checks/custodiet.md
 skills/health-check/checks/gates.md
 skills/health-check/checks/hydrator.md
 skills/health-check/checks/qa.md
+skills/health-check/output/aggregation.md
 skills/hypervisor/SKILL.md
 skills/hypervisor/prompts/gemini-task-worker.md
 skills/hypervisor/scripts/batch_worker.py
@@ -255,6 +257,7 @@ skills/session-insights/scripts/find_pending.py
 skills/session-insights/scripts/merge_insights.py
 skills/session-insights/scripts/prepare_prompt.py
 skills/session-insights/scripts/process_response.py
+skills/swarm-supervisor/SKILL.md
 skills/task-viz/SKILL.md
 uv.lock
 workflows/audit.md
@@ -286,6 +289,7 @@ workflows/interactive-followup.md
 workflows/merge-conflict.md
 workflows/peer-review.md
 workflows/prove-feature.md
+workflows/qa-design.md
 workflows/qa.md
 workflows/reference-letter.md
 workflows/simple-question.md
@@ -293,5 +297,6 @@ workflows/skill-pilot.md
 workflows/strategy.md
 workflows/tdd-cycle.md
 workflows/triage-email.md
+workflows/version-bump.md
 workflows/worktree-merge.md
 ```

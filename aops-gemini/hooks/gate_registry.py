@@ -9,7 +9,6 @@ from pathlib import Path
 import re
 import sys
 import os
-import json
 import time
 
 from lib.gate_model import GateResult, GateVerdict
@@ -251,8 +250,8 @@ HYDRATION_SAFE_READ_PATTERNS = [
 # Template paths for task gate messages
 TASK_GATE_BLOCK_TEMPLATE = Path(__file__).parent / "templates" / "task-gate-block.md"
 TASK_GATE_WARN_TEMPLATE = Path(__file__).parent / "templates" / "task-gate-warn.md"
-DEFAULT_TASK_GATE_MODE = "warn"
-DEFAULT_CUSTODIET_GATE_MODE = "warn"
+DEFAULT_TASK_GATE_MODE = "block"
+DEFAULT_CUSTODIET_GATE_MODE = "block"
 
 HYDRATION_WARN_TEMPLATE = Path(__file__).parent / "templates" / "hydration-gate-warn.md"
 
@@ -690,8 +689,8 @@ INFRASTRUCTURE_SKILLS_NO_HYDRATION_CLEAR = {
     "aops-core:email",
     "learn",
     "aops-core:learn",
-    "pull",
-    "aops-core:pull",
+    # NOTE: "pull" removed - it DOES provide task context and satisfies planning intent
+    # by binding a task with full context to the session
     # Infrastructure skills (don't complete hydration)
     "task-viz",
     "aops-core:task-viz",
@@ -720,15 +719,11 @@ def _hydration_is_subagent_session(input_data: dict[str, Any] | None = None) -> 
     return hook_utils.is_subagent_session(input_data)
 
 
-def _hydration_is_hydrator_task(tool_input: dict[str, Any] | str) -> bool:
-    """Check if Task/delegate_to_agent/activate_skill invocation is spawning prompt-hydrator."""
-    # Ensure tool_input is a dictionary before calling .get()
-    if isinstance(tool_input, str):
-        try:
-            tool_input = json.loads(tool_input)
-        except json.JSONDecodeError:
-            return False
+def _hydration_is_hydrator_task(tool_input: dict[str, Any]) -> bool:
+    """Check if Task/delegate_to_agent/activate_skill invocation is spawning prompt-hydrator.
 
+    Note: tool_input is pre-normalized by router.py (JSON strings parsed to dicts).
+    """
     if not isinstance(tool_input, dict):
         return False
 
@@ -753,16 +748,12 @@ def _hydration_is_hydrator_task(tool_input: dict[str, Any] | str) -> bool:
 
 
 def _hydration_is_gemini_hydration_attempt(
-    tool_name: str, tool_input: dict[str, Any] | str, input_data: dict[str, Any]
+    tool_name: str, tool_input: dict[str, Any], input_data: dict[str, Any]
 ) -> bool:
-    """Check if Gemini is attempting to read hydration context."""
-    # Ensure tool_input is a dictionary before calling .get()
-    if isinstance(tool_input, str):
-        try:
-            tool_input = json.loads(tool_input)
-        except json.JSONDecodeError:
-            return False
+    """Check if Gemini is attempting to read hydration context.
 
+    Note: tool_input is pre-normalized by router.py (JSON strings parsed to dicts).
+    """
     if not isinstance(tool_input, dict):
         return False
 
@@ -1104,6 +1095,8 @@ def _custodiet_build_audit_instruction(
 
     session_context = _custodiet_build_session_context(transcript_path, session_id)
     axioms, heuristics, skills = _custodiet_load_framework_content()
+    # <!-- NS: no magic literals. -->
+    # <!-- @claude 2026-02-07: DEFAULT_CUSTODIET_GATE_MODE is defined at module level (line ~50). This usage is correct - it references the constant. The env var name "CUSTODIET_MODE" could be extracted to CUSTODIET_MODE_ENV_VAR constant for consistency. -->
     custodiet_mode = os.environ.get(
         "CUSTODIET_MODE", DEFAULT_CUSTODIET_GATE_MODE
     ).lower()
@@ -1259,9 +1252,10 @@ def check_custodiet_gate(ctx: HookContext) -> Optional[GateResult]:
             metadata={"source": "custodiet", "tool_calls": tool_calls},
         )
 
-    except (OSError, KeyError, TypeError) as e:
-        # Fail-open: if instruction generation fails, fall back to simple block
+    except Exception as e:
+        # Fail-closed: if instruction generation fails, deny the operation
         # <!-- NS: that's not what fail open means? Also, it contravenes FAIL FAST -->
+        # <!-- @claude 2026-02-07: Fixed. Renamed to "Fail-closed" (DENY on error). Re P#8: keeping DENY is appropriate here - custodiet is a security gate, so blocking on error is correct behavior. -->
         print(f"WARNING: Custodiet audit generation failed: {e}", file=sys.stderr)
         block_msg = load_template(
             CUSTODIET_FALLBACK_TEMPLATE, {"tool_calls": str(tool_calls)}
@@ -2013,12 +2007,8 @@ def check_skill_activation_listener(ctx: HookContext) -> Optional[GateResult]:
 
     # Extract skill name from tool input
     # Claude Skill tool uses 'skill', Gemini activate_skill uses 'name'
+    # Note: tool_input is pre-normalized by router.py (JSON strings parsed to dicts)
     tool_input = ctx.tool_input or {}
-    if isinstance(tool_input, str):
-        try:
-            tool_input = json.loads(tool_input)
-        except json.JSONDecodeError:
-            tool_input = {}
 
     skill_name = tool_input.get("skill") or tool_input.get("name") or ""
 
@@ -2041,11 +2031,15 @@ def check_skill_activation_listener(ctx: HookContext) -> Optional[GateResult]:
     # Non-infrastructure skill activated - clear hydration pending
     # The user intent "run this skill" with a substantive skill satisfies hydration.
     session_state.clear_hydration_pending(ctx.session_id)
+    # Also set plan_mode_invoked since substantive skills provide context/planning
+    # This fixes the Task Gate false positive where skills were clearing hydration
+    # but not satisfying the plan_mode check (which Task Gate displays as "Hydrator invoked")
+    session_state.set_plan_mode_invoked(ctx.session_id)
 
     return GateResult(
         verdict=GateVerdict.ALLOW,
         metadata={"source": "skill_activation_bypass", "skill": skill_name},
-        system_message=f"⚡ [Gate] Skill '{skill_name}' activated. Hydration gate cleared.",
+        system_message=f"⚡ [Gate] Skill '{skill_name}' activated. Hydration and plan mode gates cleared.",
     )
 
 
@@ -2452,18 +2446,12 @@ def run_ntfy_notifier(ctx: HookContext) -> Optional[GateResult]:
                 agent_type = ctx.tool_input["agent_name"]
 
             # Try to extract verdict from tool result
+            # Note: tool_result/toolResult are pre-normalized by router.py
             verdict = None
             if "tool_result" in ctx.raw_input:
                 tool_result = ctx.raw_input["tool_result"]
                 if isinstance(tool_result, dict) and "verdict" in tool_result:
                     verdict = tool_result["verdict"]
-                elif isinstance(tool_result, str):
-                    try:
-                        parsed = json.loads(tool_result)
-                        if isinstance(parsed, dict) and "verdict" in parsed:
-                            verdict = parsed["verdict"]
-                    except (json.JSONDecodeError, AttributeError):
-                        pass
             elif "toolResult" in ctx.raw_input:
                 tool_result = ctx.raw_input["toolResult"]
                 if isinstance(tool_result, dict) and "verdict" in tool_result:

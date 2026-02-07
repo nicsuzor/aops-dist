@@ -47,7 +47,7 @@ from pathlib import Path
 from typing import Any
 
 from lib.paths import get_data_root
-from lib.task_model import Task, TaskStatus
+from lib.task_model import Task, TaskStatus, TaskType
 from lib.task_storage import TaskStorage
 
 logger = logging.getLogger(__name__)
@@ -214,6 +214,14 @@ class TaskIndex:
 
     VERSION = 2
 
+    # Task types that can be claimed by workers (actionable work items)
+    CLAIMABLE_TYPES = {
+        TaskType.TASK.value,
+        TaskType.ACTION.value,
+        TaskType.BUG.value,
+        TaskType.FEATURE.value,
+    }
+
     def __init__(self, data_root: Path | None = None):
         """Initialize task index.
 
@@ -311,7 +319,11 @@ class TaskIndex:
             unmet_deps = [d for d in entry.depends_on if d not in completed_ids]
             if unmet_deps or entry.status == TaskStatus.BLOCKED.value:
                 self._blocked.append(task_id)
-            elif entry.leaf and entry.status == TaskStatus.ACTIVE.value:
+            elif (
+                entry.leaf
+                and entry.status == TaskStatus.ACTIVE.value
+                and entry.type in self.CLAIMABLE_TYPES
+            ):
                 self._ready.append(task_id)
 
         # Sort ready by priority
@@ -525,7 +537,7 @@ class TaskIndex:
             return ancestors[-1]
         return self._tasks.get(task_id)
 
-    # Tags that indicate human-assigned tasks (excluded when caller is 'bot')
+    # Tags that indicate human-assigned tasks (excluded when caller is 'polecat')
     HUMAN_TAGS = {"nic", "human"}
 
     def get_ready_tasks(
@@ -537,7 +549,7 @@ class TaskIndex:
             project: Filter by project
             caller: Filter by assignee - returns tasks where assignee is None
                     or assignee matches caller. If caller is None, returns all.
-                    When caller is 'bot', also excludes tasks with human tags
+                    When caller is 'polecat', also excludes tasks with human tags
                     ('nic', 'human') in their tags list.
 
         Returns:
@@ -552,8 +564,8 @@ class TaskIndex:
         if caller is not None:
             entries = [e for e in entries if e.assignee is None or e.assignee == caller]
 
-            # When caller is 'bot', also exclude tasks with human tags
-            if caller == "bot":
+            # When caller is 'polecat', also exclude tasks with human tags
+            if caller == "polecat":
                 entries = [e for e in entries if not (set(e.tags) & self.HUMAN_TAGS)]
 
         # Sort by priority (lower is higher priority), then order, then title

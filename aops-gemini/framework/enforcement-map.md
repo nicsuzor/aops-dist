@@ -113,6 +113,7 @@ tags: [framework, enforcement, moc]
 | [[verify-non-duplication-batch-create]] | Verify Non-Duplication Before Batch Create | HEURISTICS.md, triage-email workflow             | SessionStart, batch operations | 1a    |
 | [[run-python-via-uv]]                   | Run Python via uv                          | HEURISTICS.md                                    | SessionStart                   | 1a    |
 | [[protect-dist-directory]]              | Protect dist/ Directory                    | .agent/rules/HEURISTICS.md, policy_enforcer.py | SessionStart, PreToolUse       | 1a    |
+| [[subagent-verdicts-binding]]           | Subagent Verdicts Are Binding              | HEURISTICS.md                                  | SessionStart, SubagentStop     | 1a    |
 
 ## Enforcement Level Summary
 
@@ -260,17 +261,23 @@ Uses passive `additionalContext` format - agent may proceed without addressing.
 
 ## Path Protection (Deny Rules)
 
-| Category         | Pattern                                       | Blocked Tools           | Purpose                    | Axiom                        |
-| ---------------- | --------------------------------------------- | ----------------------- | -------------------------- | ---------------------------- |
-| Claude config    | `~/.claude/*.json`                            | Read, Write, Edit, Bash | Protect secrets            | [[data-boundaries]]          |
-| Claude runtime   | `~/.claude/{hooks,skills,commands,agents}/**` | Write, Edit, Bash       | Force edits via `$AOPS/`   | [[skills-are-read-only]]     |
-| Research records | `**/tja/records/**`, `**/tox/records/**`      | Write, Edit, Bash       | Research data immutable    | [[research-data-immutable]]  |
-| Session state    | `/tmp/claude-session/**`                      | Write, Edit, Bash       | Hydration gate enforcement | Mechanical trigger integrity |
-| Task indices     | `**/data/tasks/*.json`                        | Read, Bash              | Enforce MCP server usage   | [[just-in-time-context]]     |
+| Category          | Pattern                                       | Blocked Tools           | Purpose                         | Axiom                        |
+| ----------------- | --------------------------------------------- | ----------------------- | ------------------------------- | ---------------------------- |
+| Claude config     | `~/.claude/*.json`                            | Read, Write, Edit, Bash | Protect secrets                 | [[data-boundaries]]          |
+| Claude runtime    | `~/.claude/{hooks,skills,commands,agents}/**` | Write, Edit, Bash       | Force edits via `$AOPS/`        | [[skills-are-read-only]]     |
+| Claude plugins    | `~/.claude/plugins/**`                        | Write, Edit             | Protect installed plugins       | [[skills-are-read-only]]     |
+| Gemini extensions | `~/.gemini/extensions/**`                     | Write, Edit             | Protect installed extensions    | [[skills-are-read-only]]     |
+| Research records  | `**/tja/records/**`, `**/tox/records/**`      | Write, Edit, Bash       | Research data immutable         | [[research-data-immutable]]  |
+| Session state     | `/tmp/claude-session/**`                      | Write, Edit, Bash       | Hydration gate enforcement      | Mechanical trigger integrity |
+| Task indices      | `**/data/tasks/*.json`                        | Read, Bash              | Enforce MCP server usage        | [[just-in-time-context]]     |
 
 **Note**: Reading `~/.claude/hooks/**` etc IS allowed (skill invocation needs it).
 
 **Note**: Task JSON files (index.json, id_mapping.json) must be queried via tasks MCP server (list_tasks, search_tasks, get_task_tree, etc.) to prevent token bloat from reading large files directly.
+
+**Note**: Claude plugins and Gemini extensions protection enforced via:
+- Claude: `~/.claude/settings.json` → `permissions.deny`
+- Gemini: `~/.gemini/policies/deny-extension-writes.toml` (policy engine)
 
 ## API Validation (Tasks MCP Server)
 
@@ -433,7 +440,7 @@ Main agent has all tools except deny rules. Subagents are restricted:
 | prompt-hydrator   | Read, Grep, mcp__memory__retrieve_memory, Task | haiku  | Context enrichment (Edit/Write blocked by check_subagent_tool_restrictions) |
 | custodiet         | Read                                           | haiku  | Compliance checking     |
 | critic            | Read                                           | opus   | Plan/conclusion review  |
-| qa                | Read, Grep, Glob                               | opus   | Independent verification|
+| qa                | Read, Grep, Glob                               | opus   | Independent verification (anti-sycophancy: must verify against original request verbatim, not agent reframing) |
 | planner           | All (inherits from main)                       | sonnet | Implementation planning |
 | effectual-planner | All (inherits from main)                       | opus   | Strategic planning      |
 
@@ -462,7 +469,7 @@ Context injected via CORE.md at SessionStart.
 
 | Assignment | Tag | Purpose |
 |------------|-----|---------|
-| Bot/agent work | `tags: ["bot"]` | Automated tasks for agent execution |
+| Bot/agent work | `tags: ["polecat"]` | Automated tasks for agent execution |
 | Human/user work | `tags: ["human"]` | Manual tasks requiring user action |
 
 **Rule**: Use tags for task assignment, not the `context` field.
