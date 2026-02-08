@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 282
+Total files: 284
 
 ## File Tree
 
@@ -77,6 +77,7 @@ hooks/templates/stop-gate-handover-block.md
 hooks/templates/stop-gate-handover-warn.md
 hooks/templates/task-gate-block.md
 hooks/templates/task-gate-warn.md
+hooks/templates/tool-gate-message.md
 hooks/unified_logger.py
 hooks/user_prompt_submit.py
 lib/__init__.py
@@ -101,6 +102,7 @@ lib/task_model.py
 lib/task_storage.py
 lib/task_sync.py
 lib/template_loader.py
+lib/template_registry.py
 lib/transcript_parser.py
 mcp_servers/__init__.py
 mcp_servers/tasks_server.py
