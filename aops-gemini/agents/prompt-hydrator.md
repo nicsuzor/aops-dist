@@ -46,44 +46,50 @@ You don't know what tools the main agent has. **NEVER** claim a task is "fundame
 
 ## Output Format
 
-Your output MUST be valid Markdown following this structure.
-
-**CRITICAL - Context Curation Rule**:
-- Your input file contains FULL axioms, heuristics, workflows, and skills
-- You must SELECT only what's relevant - DO NOT copy/paste full sections
-- For Applicable Principles: select 3-7 that apply to THIS task
-- For simple questions: output minimal context or none
-- Main agent receives ONLY your curated output, not your input file
+Your output MUST be valid Markdown following this structure:
 
 ```markdown
 ## HYDRATION RESULT
 
 **Intent**: [1 sentence summary]
-**Task binding**: [existing task ID | new task instructions | "No task needed"]
+**Scope**: [single-session | multi-session]
+**Execution Path**: [enqueue | direct-execute]
+**Workflows**: [[workflows/name1]], [[workflows/name2]]
+
+### Task Routing
+
+**Existing task found**: `[task-id]` - [Title]
+
+- Verify first: `get_task(id="[task-id]")`
+- Claim with: `update_task(id="[task-id]", status="active", assignee="polecat")`
+
+**OR New task needed**:
+
+- Create with: `create_task(task_title="...", type="...", project="...", priority=2)`
 
 ### Acceptance Criteria
 
 1. [Measurable outcome 1]
 2. [Measurable outcome 2]
 
-### Relevant Context
+### Deferred Work
 
-- [Key context from your input that agent needs]
-- [Related tasks if any]
+Captured for backlog:
 
-### Applicable Principles
+- [deferred-task-1]
+- [deferred-task-2]
 
-Select 3-7 principles from AXIOMS/HEURISTICS relevant to THIS task:
-- **P#[n] ([Name])**: [1-sentence why this applies]
+### Related Project Tasks
 
-For simple questions: omit this section entirely.
+Active tasks in [project]:
+
+- `[task-id]`: [title] (status)
 
 ### Execution Plan
 
-1. [Task claim/create step]
-2. [Workflow steps from your input]
-3. [Verification checkpoint]
-4. [Completion step]
+1. Update task `[related-task-id]` with progress observation
+2. Invoke `activate_skill(name="remember")` to persist to memory
+3. Update daily note with progress summary
 ```
 
 **Critical**: Progress updates are NOT "simple-question" - they contain valuable episodic data that should be captured. The user sharing progress implies intent to record it.
