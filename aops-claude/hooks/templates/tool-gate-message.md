@@ -13,11 +13,21 @@ description: |
     {gate_status} - Formatted gate status lines
     {next_instruction} - What the agent should do next
 ---
-⚠️ **GATE BLOCKED ({mode})**
 
-**Tool**: `{tool_name}` ({tool_category})
-**Missing**: {missing_gates}
+⏸️ **Gate Check ({mode})** - `{tool_name}`
 
+The framework tracks work through gates to help you:
+- **Task binding**: Links work to a trackable task for progress visibility and handover
+- **Critic review**: Gets a second opinion on your plan before execution
+- **Custodiet**: Periodic scope check to catch drift early
+
+**Current status**:
 {gate_status}
 
-**Next**: {next_instruction}
+**Missing**: {missing_gates}
+
+**To proceed**: {next_instruction}
+
+**Bypass**: User can prefix prompt with `.` for quick fixes that skip gates.
+
+*Gates exist to help you succeed, not to block you. They catch scope drift, enable clean handovers, and make work visible.*
