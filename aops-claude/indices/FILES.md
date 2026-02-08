@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 284
+Total files: 282
 
 ## File Tree
 
@@ -43,9 +43,7 @@ commands/work.md
 framework/enforcement-map.md
 hooks/__init__.py
 hooks/autocommit_state.py
-hooks/command_intercept.py
 hooks/data/reminders.txt
-hooks/fail_fast_watchdog.py
 hooks/gate_config.py
 hooks/gate_registry.py
 hooks/gates.py

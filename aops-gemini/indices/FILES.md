@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 285
+Total files: 283
 
 ## File Tree
 
@@ -45,9 +45,7 @@ framework/enforcement-map.md
 gemini-extension.json
 hooks/__init__.py
 hooks/autocommit_state.py
-hooks/command_intercept.py
 hooks/data/reminders.txt
-hooks/fail_fast_watchdog.py
 hooks/gate_config.py
 hooks/gate_registry.py
 hooks/gates.py
