@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 284
+Total files: 285
 
 ## File Tree
 
@@ -297,6 +297,7 @@ workflows/reference-letter.md
 workflows/simple-question.md
 workflows/skill-pilot.md
 workflows/strategy.md
+workflows/task-triage.md
 workflows/tdd-cycle.md
 workflows/triage-email.md
 workflows/version-bump.md
