@@ -2,7 +2,7 @@
 name: effectual-planner
 description: Strategic planning under uncertainty (goals, projects, knowledge-building).
   NOT for implementation plans.
-model: gemini-2.5-pro
+model: gemini-3-pro-preview
 tools:
 - read_file
 - write_file

@@ -1,7 +1,7 @@
 ---
 name: critic
 description: Second-opinion review of plans and conclusions
-model: gemini-2.5-pro
+model: gemini-3-pro-preview
 tools:
 - read_file
 kind: local

@@ -2,7 +2,7 @@
 name: prompt-hydrator
 description: Transform terse prompts into execution plans with scope detection, task
   routing, and deferred work capture
-model: gemini-2.5-flash
+model: gemini-2.5-flash-light
 tools:
 - read_file
 - activate_skill
