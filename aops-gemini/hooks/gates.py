@@ -246,6 +246,12 @@ def _open_gate(session_id: str, gate: str) -> None:
     """Open a gate by setting the corresponding state flag."""
     from lib import session_state
 
+    # Update unified gates dictionary
+    state = session_state.get_or_create_session_state(session_id)
+    state.setdefault("state", {}).setdefault("gates", {})[gate] = "open"
+    session_state.save_session_state(session_id, state)
+
+    # Legacy flag updates for backwards compatibility
     if gate == "hydration":
         session_state.clear_hydration_pending(session_id)
     elif gate == "task":
@@ -268,6 +274,12 @@ def _close_gate(session_id: str, gate: str) -> None:
     """Close a gate by clearing the corresponding state flag."""
     from lib import session_state
 
+    # Update unified gates dictionary
+    state = session_state.get_or_create_session_state(session_id)
+    state.setdefault("state", {}).setdefault("gates", {})[gate] = "closed"
+    session_state.save_session_state(session_id, state)
+
+    # Legacy flag updates for backwards compatibility
     if gate == "hydration":
         session_state.set_hydration_pending(session_id, "")
     elif gate == "task":
@@ -281,22 +293,68 @@ def _close_gate(session_id: str, gate: str) -> None:
 
 
 def _create_audit_file(session_id: str, gate: str, ctx: HookContext) -> Path | None:
-    """Create audit file for gate if template exists."""
-    template = TEMPLATES_DIR / f"{gate}-audit.md"
-    if not template.exists():
-        return None
+    """Create rich audit file for gate using TemplateRegistry."""
+    from lib.session_reader import build_rich_session_context
+    from lib.template_registry import TemplateRegistry
 
-    content = template.read_text().format(
-        session_id=session_id,
-        gate_name=gate,
-        tool_name=ctx.tool_name or "unknown",
-    )
-
-    # Write to temp
     from lib import hook_utils
 
-    temp_dir = hook_utils.get_hook_temp_dir(gate, ctx.raw_input)
-    return hook_utils.write_temp_file(content, temp_dir, f"{gate}_")
+    # Align temp category with hydrator per user request
+    category = "hydrator"
+
+    # Try to load rich context if possible
+    transcript_path = ctx.transcript_path or ctx.raw_input.get("transcript_path")
+    session_context = ""
+    if transcript_path:
+        session_context = build_rich_session_context(transcript_path)
+
+    axioms, heuristics, skills = hook_utils.load_framework_content()
+    custodiet_mode = os.environ.get("CUSTODIET_MODE", "block").lower()
+
+    registry = TemplateRegistry.instance()
+
+    # Determine which template to use
+    if gate == "custodiet":
+        try:
+            content = registry.render(
+                "custodiet.context",
+                {
+                    "session_context": session_context,
+                    "tool_name": ctx.tool_name or "unknown",
+                    "axioms_content": axioms,
+                    "heuristics_content": heuristics,
+                    "skills_content": skills,
+                    "custodiet_mode": custodiet_mode,
+                },
+            )
+        except (KeyError, ValueError, FileNotFoundError):
+            # Fallback to simple audit template if rich one fails
+            content = registry.render(
+                "custodiet.audit",
+                {
+                    "session_id": session_id,
+                    "gate_name": gate,
+                    "tool_name": ctx.tool_name or "unknown",
+                },
+            )
+    else:
+        # Generic audit for other gates
+        try:
+            content = registry.render(
+                f"{gate}.audit",
+                {
+                    "session_id": session_id,
+                    "gate_name": gate,
+                    "tool_name": ctx.tool_name or "unknown",
+                },
+            )
+        except (KeyError, ValueError, FileNotFoundError):
+            return None
+
+    # Write to temp (using aligned category)
+    temp_dir = hook_utils.get_hook_temp_dir(category, ctx.raw_input)
+    prefix = "audit_" if gate == "custodiet" else f"{gate}_"
+    return hook_utils.write_temp_file(content, temp_dir, prefix)
 
 
 def _matches_condition(
@@ -319,8 +377,15 @@ def _matches_condition(
             or tool_input.get("name", "")
             or tool_input.get("skill", "")
         )
+        # Match if either is contained in the other (e.g. "hydrator" matches "aops-core:prompt-hydrator")
         # Also match when tool_name IS the agent (Gemini direct MCP call)
-        if subagent not in actual and tool_name not in (subagent, subagent.split(":")[-1]):
+        short_subagent = subagent.split(":")[-1]
+        if (
+            subagent not in actual
+            and short_subagent not in actual
+            and actual not in subagent
+            and tool_name not in (subagent, short_subagent)
+        ):
             return False
 
     contains = cond.get("output_contains")
@@ -363,11 +428,11 @@ def _matches_trigger(
     counter = trigger.get("threshold_counter")
     if counter:
         threshold = trigger.get("threshold_value", 0)
-        state = session_state.get_or_create_session_state(session_id)
-        state_data = state.setdefault("state", {})
-        count = state_data.get("tool_calls_since_compliance", 0) + 1
-        state_data["tool_calls_since_compliance"] = count
-        session_state.save_session_state(session_id, state)
+        state = session_state.load_session_state(session_id)
+        if state is None:
+            return False
+        state_data = state.get("state", {})
+        count = state_data.get("tool_calls_since_compliance", 0)
         if count < threshold:
             return False
 

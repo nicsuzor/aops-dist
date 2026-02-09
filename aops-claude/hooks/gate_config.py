@@ -13,6 +13,8 @@ gate_registry.py, or gates.py.
 
 from typing import Any
 
+from lib.session_state import get_custodiet_threshold
+
 # =============================================================================
 # TOOL CATEGORIES
 # =============================================================================
@@ -39,6 +41,7 @@ TOOL_CATEGORIES: dict[str, set[str]] = {
         "mcp__plugin_aops-core_task_manager__decompose_task",
         "mcp__plugin_aops-core_task_manager__claim_next_task",
         "mcp__plugin_aops-core_task_manager__rebuild_index",
+        "mcp__plugin_aops-core_task_manager__list_tasks",
         # Gemini short names for task manager
         "create_task",
         "update_task",
@@ -103,7 +106,6 @@ TOOL_CATEGORIES: dict[str, set[str]] = {
         "mcp__plugin_aops-core_memory__check_database_health",
         "mcp__plugin_context7-plugin_context7__resolve-library-id",
         "mcp__plugin_context7-plugin_context7__query-docs",
-        "mcp__plugin_aops-core_task_manager__list_tasks",
         "mcp__plugin_aops-core_task_manager__search_tasks",
         "mcp__plugin_aops-core_task_manager__get_task_tree",
         "mcp__plugin_aops-core_task_manager__get_review_tasks",
@@ -365,7 +367,7 @@ GATE_CLOSURE_TRIGGERS: dict[str, list[dict[str, Any]]] = {
             "event": "PostToolUse",
             "tool_category": "write",
             "threshold_counter": "tool_calls_since_custodiet",
-            "threshold_value": 7,
+            "threshold_value": get_custodiet_threshold(),
             "description": "Re-close after N write operations (periodic re-verification)",
         },
     ],

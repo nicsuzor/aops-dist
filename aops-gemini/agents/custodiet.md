@@ -1,7 +1,7 @@
 ---
 name: custodiet
 description: Ultra vires detector - catches agents acting beyond granted authority
-model: gemini-2.5-flash-light
+model: gemini-3-flash-preview
 tools:
 - read_file
 - write_file
