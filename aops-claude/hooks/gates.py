@@ -30,7 +30,8 @@ def check_tool_gate(ctx: HookContext, state: SessionState) -> GateResult:
     _ensure_initialized()
 
     # Global Bypass: Allow hydrator's own tool calls
-    if state.state.get("hydrator_active"):
+    # Check both legacy flag and new HookContext subagent_type
+    if state.state.get("hydrator_active") or ctx.subagent_type == "hydrator":
         return GateResult.allow()
 
     # Iterate all gates
@@ -40,8 +41,8 @@ def check_tool_gate(ctx: HookContext, state: SessionState) -> GateResult:
         if result and result.verdict == GateVerdict.DENY:
             return result
         if result and result.verdict == GateVerdict.WARN:
-             # For now, return the first warning/block.
-             return result
+            # For now, return the first warning/block.
+            return result
 
     return GateResult.allow()
 
@@ -64,7 +65,7 @@ def update_gate_state(ctx: HookContext, state: SessionState) -> GateResult | Non
     if messages or context_injections:
         return GateResult.allow(
             system_message="\n".join(messages) if messages else None,
-            context_injection="\n\n".join(context_injections) if context_injections else None
+            context_injection="\n\n".join(context_injections) if context_injections else None,
         )
 
     return None
@@ -89,7 +90,7 @@ def on_user_prompt(ctx: HookContext, state: SessionState) -> GateResult | None:
     if messages or context_injections:
         return GateResult.allow(
             system_message="\n".join(messages) if messages else None,
-            context_injection="\n\n".join(context_injections) if context_injections else None
+            context_injection="\n\n".join(context_injections) if context_injections else None,
         )
 
     return None
@@ -98,17 +99,17 @@ def on_user_prompt(ctx: HookContext, state: SessionState) -> GateResult | None:
 def on_session_start(ctx: HookContext, state: SessionState) -> GateResult | None:
     """SessionStart: Notify all gates and perform initialization."""
     _ensure_initialized()
-    
+
     # --- Fail-Fast Initialization Logic (Restored) ---
-    
+
     short_hash = session_paths.get_session_short_hash(ctx.session_id)
     hook_log_path = get_hook_log_path(ctx.session_id, ctx.raw_input)
     state_file_path = session_paths.get_session_file_path(ctx.session_id, input_data=ctx.raw_input)
 
     if not state_file_path.exists():
-         try:
-             state.save()
-         except OSError as e:
+        try:
+            state.save()
+        except OSError as e:
             return GateResult(
                 verdict=GateVerdict.DENY,
                 system_message=(
@@ -151,14 +152,17 @@ def on_session_start(ctx: HookContext, state: SessionState) -> GateResult | None
     # --- Notify Gates ---
 
     # Brief user-facing messages
-    messages = [f"🚀 Session Started: {ctx.session_id} ({short_hash})"]
-
-    # Detailed context for agent
-    details = [
+    # We provide references here to help debugging
+    messages = [
+        f"🚀 Session Started: {ctx.session_id} ({short_hash})",
         f"State File: {state_file_path}",
         f"Hooks log: {hook_log_path}",
         f"Transcript: {transcript_path}",
     ]
+
+    # Detailed context for agent
+    # Agent doesn't need to know anything at this stage.
+    details = []
 
     context_injections = []
     for gate in GateRegistry.get_all_gates():
@@ -171,7 +175,8 @@ def on_session_start(ctx: HookContext, state: SessionState) -> GateResult | None
 
     return GateResult.allow(
         system_message="\n".join(messages),
-        context_injection="\n".join(details) + ("\n\n" + "\n\n".join(context_injections) if context_injections else "")
+        context_injection="\n".join(details)
+        + ("\n\n" + "\n\n".join(context_injections) if context_injections else ""),
     )
 
 
@@ -208,10 +213,11 @@ def on_after_agent(ctx: HookContext, state: SessionState) -> GateResult | None:
     if messages or context_injections:
         return GateResult.allow(
             system_message="\n".join(messages) if messages else None,
-            context_injection="\n\n".join(context_injections) if context_injections else None
+            context_injection="\n\n".join(context_injections) if context_injections else None,
         )
 
     return None
+
 
 def on_subagent_stop(ctx: HookContext, state: SessionState) -> GateResult | None:
     """SubagentStop: Notify all gates."""
@@ -231,7 +237,7 @@ def on_subagent_stop(ctx: HookContext, state: SessionState) -> GateResult | None
     if messages or context_injections:
         return GateResult.allow(
             system_message="\n".join(messages) if messages else None,
-            context_injection="\n\n".join(context_injections) if context_injections else None
+            context_injection="\n\n".join(context_injections) if context_injections else None,
         )
 
     return None
