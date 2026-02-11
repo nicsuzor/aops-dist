@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 291
+Total files: 292
 
 ## File Tree
 
@@ -290,6 +290,7 @@ workflows/email-reply.md
 workflows/feature-dev.md
 workflows/framework-change.md
 workflows/framework-gate.md
+workflows/github-issue-cycle.md
 workflows/handover.md
 workflows/hdr-supervision.md
 workflows/interactive-followup.md
