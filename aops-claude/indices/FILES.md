@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 292
+Total files: 293
 
 ## File Tree
 
@@ -93,6 +93,7 @@ lib/gates/engine.py
 lib/gates/registry.py
 lib/hook_utils.py
 lib/insights_generator.py
+lib/path_reconstructor.py
 lib/paths.py
 lib/pipeline_metrics.py
 lib/reflection_detector.py

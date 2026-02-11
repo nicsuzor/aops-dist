@@ -15,8 +15,3 @@ category: base
 4. **Verify pass**: Confirm test passes
 5. **Refactor**: Optional cleanup (keep tests green)
 6. **Repeat**: If more acceptance criteria remain
-
-## When to Skip
-
-- Non-code changes (docs, config)
-- Exploratory work where tests aren't yet meaningful
