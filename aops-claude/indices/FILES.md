@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 293
+Total files: 289
 
 ## File Tree
 
@@ -269,25 +269,25 @@ skills/swarm-supervisor/SKILL.md
 skills/task-viz/SKILL.md
 uv.lock
 workflows/audit.md
+workflows/base-batch.md
 workflows/base-commit.md
+workflows/base-investigation.md
+workflows/base-qa.md
 workflows/base-task-tracking.md
 workflows/base-tdd.md
 workflows/base-verification.md
 workflows/batch-processing.md
-workflows/batch-task-processing.md
 workflows/classify-task.md
 workflows/collaborate.md
 workflows/constraint-check.md
-workflows/critic-detailed.md
-workflows/critic-fast.md
+workflows/critic.md
 workflows/debugging.md
 workflows/decompose.md
 workflows/design.md
 workflows/direct-skill.md
-workflows/dogfooding.md
 workflows/email-capture.md
-workflows/email-classify.md
 workflows/email-reply.md
+workflows/email-triage.md
 workflows/feature-dev.md
 workflows/framework-change.md
 workflows/framework-gate.md
@@ -296,18 +296,14 @@ workflows/handover.md
 workflows/hdr-supervision.md
 workflows/interactive-followup.md
 workflows/merge-conflict.md
+workflows/meta-improvement.md
 workflows/peer-review.md
-workflows/prove-feature.md
-workflows/qa-design.md
-workflows/qa-test.md
 workflows/qa.md
 workflows/reference-letter.md
 workflows/simple-question.md
-workflows/skill-pilot.md
 workflows/strategy.md
 workflows/task-triage.md
 workflows/tdd-cycle.md
-workflows/triage-email.md
 workflows/version-bump.md
 workflows/worktree-merge.md
 ```
