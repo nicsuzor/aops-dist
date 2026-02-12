@@ -29,9 +29,22 @@ def check_tool_gate(ctx: HookContext, state: SessionState) -> GateResult:
     """PreToolUse: Check all gates."""
     _ensure_initialized()
 
-    # Global Bypass: Allow hydrator's own tool calls
-    # Check both legacy flag and new HookContext subagent_type
-    if state.state.get("hydrator_active") or ctx.subagent_type == "hydrator":
+    # Global Bypass: Allow hydrator and custodiet subagent tool calls
+    # These compliance agents must never be blocked by gates they enforce,
+    # otherwise recursive blocking deadlocks occur (aops-81df9690).
+    _COMPLIANCE_SUBAGENT_TYPES = {
+        "hydrator",
+        "prompt-hydrator",
+        "aops-core:prompt-hydrator",
+        "custodiet",
+        "aops-core:custodiet",
+        "qa",
+        "aops-core:qa",
+        # special case for framework butler.
+        "aops-core:butler",
+        "butler",
+    }
+    if state.state.get("hydrator_active") or ctx.subagent_type in _COMPLIANCE_SUBAGENT_TYPES:
         return GateResult.allow()
 
     # Iterate all gates
@@ -155,6 +168,7 @@ def on_session_start(ctx: HookContext, state: SessionState) -> GateResult | None
     # We provide references here to help debugging
     messages = [
         f"🚀 Session Started: {ctx.session_id} ({short_hash})",
+        f"Version: {state.version}",
         f"State File: {state_file_path}",
         f"Hooks log: {hook_log_path}",
         f"Transcript: {transcript_path}",

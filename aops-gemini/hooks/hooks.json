@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "env -u VIRTUAL_ENV uv run --directory ${extensionPath} python hooks/router.py --client gemini",
+            "command": "env -u VIRTUAL_ENV uv run --directory ${extensionPath} python hooks/router.py --client gemini SessionStart",
             "timeout": 15000
           }
         ]
@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "env -u VIRTUAL_ENV uv run --directory ${extensionPath} python hooks/router.py --client gemini",
+            "command": "env -u VIRTUAL_ENV uv run --directory ${extensionPath} python hooks/router.py --client gemini BeforeTool",
             "timeout": 5000
           }
         ]
@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "env -u VIRTUAL_ENV uv run --directory ${extensionPath} python hooks/router.py --client gemini",
+            "command": "env -u VIRTUAL_ENV uv run --directory ${extensionPath} python hooks/router.py --client gemini AfterTool",
             "timeout": 5000
           }
         ]
@@ -38,7 +38,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "env -u VIRTUAL_ENV uv run --directory ${extensionPath} python hooks/router.py --client gemini",
+            "command": "env -u VIRTUAL_ENV uv run --directory ${extensionPath} python hooks/router.py --client gemini BeforeAgent",
             "timeout": 5000
           }
         ]
@@ -49,7 +49,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "env -u VIRTUAL_ENV uv run --directory ${extensionPath} python hooks/router.py --client gemini",
+            "command": "env -u VIRTUAL_ENV uv run --directory ${extensionPath} python hooks/router.py --client gemini SessionEnd",
             "timeout": 10000
           }
         ]

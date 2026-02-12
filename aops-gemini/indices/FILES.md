@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 290
+Total files: 293
 
 ## File Tree
 
@@ -111,6 +111,7 @@ lib/task_storage.py
 lib/task_sync.py
 lib/template_loader.py
 lib/template_registry.py
+lib/transcript_error_analyzer.py
 lib/transcript_parser.py
 mcp_servers/__init__.py
 mcp_servers/tasks_server.py
@@ -273,6 +274,7 @@ workflows/audit.md
 workflows/base-batch.md
 workflows/base-commit.md
 workflows/base-investigation.md
+workflows/base-memory-capture.md
 workflows/base-qa.md
 workflows/base-task-tracking.md
 workflows/base-tdd.md
@@ -289,6 +291,7 @@ workflows/direct-skill.md
 workflows/email-capture.md
 workflows/email-reply.md
 workflows/email-triage.md
+workflows/external-batch-submission.md
 workflows/feature-dev.md
 workflows/framework-change.md
 workflows/framework-gate.md

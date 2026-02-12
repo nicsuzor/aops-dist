@@ -96,8 +96,8 @@ GATE_CONFIGS = [
                     "You must invoke the **prompt-hydrator** agent to load context before proceeding.\n\n"
                     "**Instruction**:\n"
                     "Run the hydrator with this command:\n"
-                    "- Gemini: `delegate_to_agent(name='prompt-hydrator', query='Analyze context in {temp_path}')`\n"
-                    "- Claude: `Task(subagent_type='prompt-hydrator', prompt='Analyze context in {temp_path}')`"
+                    "- Gemini: `delegate_to_agent(name='prompt-hydrator', query='Transform user prompt using context in {temp_path}')`\n"
+                    "- Claude: `Task(subagent_type='prompt-hydrator', prompt='Transform user prompt using context in {temp_path}')`"
                 ),
             )
         ],
@@ -181,45 +181,45 @@ GATE_CONFIGS = [
     # Closes after hydration, blocks edit tools until plan is reviewed and approved by critic.
     GateConfig(
         name="critic",
-        description="Blocks edit tools until plan is reviewed and approved.",
-        initial_status=GateStatus.OPEN,  # Open at session start (no plan yet)
+        description="Enforces plan review before editing.",
+        initial_status=GateStatus.OPEN,
         triggers=[
-            # Hydration complete -> Close (plan exists, needs review)
+            # Hydration completes -> Close gate
             GateTrigger(
                 condition=GateCondition(
                     hook_event="SubagentStop", subagent_type_pattern="hydrator"
                 ),
                 transition=GateTransition(
                     target_status=GateStatus.CLOSED,
-                    system_message_template="📋 Plan ready for review. Invoke critic before editing.",
+                    system_message_template="📋 Hydration complete. Plan review required before editing.",
                 ),
             ),
-            # Fallback: Task tool with hydrator completes -> Close
-            GateTrigger(
-                condition=GateCondition(
-                    hook_event="PostToolUse",
-                    tool_name_pattern="Task",
-                    tool_input_pattern="hydrator",
-                ),
-                transition=GateTransition(
-                    target_status=GateStatus.CLOSED,
-                    system_message_template="📋 Plan ready for review. Invoke critic before editing.",
-                ),
-            ),
-            # Critic review complete -> Open (can now edit)
+            # Critic review completes with PROCEED -> Open gate
             GateTrigger(
                 condition=GateCondition(hook_event="SubagentStop", subagent_type_pattern="critic"),
                 transition=GateTransition(
                     target_status=GateStatus.OPEN,
                     reset_ops_counter=True,
-                    system_message_template="👁️ Critic review complete. Edit tools enabled.",
+                    system_message_template="👁️ Critic review complete. Editing allowed.",
                 ),
             ),
-            # Fallback: Task tool with critic completes -> Open
+            # Task tool calls critic (fallback)
             GateTrigger(
                 condition=GateCondition(
                     hook_event="PostToolUse",
                     tool_name_pattern="Task",
+                    tool_input_pattern=r"\bcritic\b",
+                ),
+                transition=GateTransition(
+                    target_status=GateStatus.OPEN,
+                    reset_ops_counter=True,
+                ),
+            ),
+            # Skill tool calls critic (fallback)
+            GateTrigger(
+                condition=GateCondition(
+                    hook_event="PostToolUse",
+                    tool_name_pattern="Skill",
                     tool_input_pattern="critic",
                 ),
                 transition=GateTransition(
@@ -229,12 +229,14 @@ GATE_CONFIGS = [
             ),
         ],
         policies=[
-            # If Closed, block edit tools (except always_available)
+            # Block edit tools when CLOSED
+            # Anchored regex prevents matching TodoWrite etc. (aops-81df9690)
             GatePolicy(
                 condition=GateCondition(
                     current_status=GateStatus.CLOSED,
                     hook_event="PreToolUse",
-                    tool_name_pattern="Edit|Write|NotebookEdit",
+                    tool_name_pattern="^(Edit|Write|NotebookEdit|MultiEdit)$",
+                    excluded_tool_categories=["always_available"],
                 ),
                 verdict="deny",
                 message_template="⛔ Critic review required before editing. Invoke critic agent first.",
@@ -242,47 +244,54 @@ GATE_CONFIGS = [
                     "**CRITIC REVIEW REQUIRED**\n\n"
                     "You must invoke the **critic** agent to review your plan before making edits.\n\n"
                     "**Instruction**:\n"
-                    "- Claude: `Task(subagent_type='aops-core:critic', prompt='Review the plan in the hydration output')`"
+                    "Run the critic with this command:\n"
+                    "- Gemini: `delegate_to_agent(name='aops-core:critic', query='Review the plan in the hydration output')`\n"
+                    "- Claude: `Task(subagent_type='aops-core:critic', prompt='Review the plan in the hydration output')`\n"
+                    "- Make sure you obey the instructions the tool or subagent produces, but do not print the output to the user -- it just clutters up the conversation."
                 ),
             ),
         ],
     ),
     # --- QA ---
     # Blocks exit until planned requirements are verified by QA agent.
-    # Requirements are set after hydration and approved by critic.
     GateConfig(
         name="qa",
-        description="Blocks exit until planned requirements are verified.",
-        initial_status=GateStatus.OPEN,  # Open at session start (no requirements yet)
+        description="Ensures requirements compliance before exit.",
+        initial_status=GateStatus.CLOSED,
         triggers=[
-            # Critic approves plan -> Close (requirements now set, need verification before exit)
-            GateTrigger(
-                condition=GateCondition(hook_event="SubagentStop", subagent_type_pattern="critic"),
-                transition=GateTransition(
-                    target_status=GateStatus.CLOSED,
-                    system_message_template="🧪 QA gate closed. Run QA before exiting.",
-                ),
-            ),
-            # QA verification complete -> Open (can now exit)
+            # QA agent verifies requirements -> Open gate
             GateTrigger(
                 condition=GateCondition(hook_event="SubagentStop", subagent_type_pattern="qa"),
                 transition=GateTransition(
                     target_status=GateStatus.OPEN,
-                    system_message_template="🧪 QA verification complete. Exit allowed.",
+                    system_message_template="🧪 QA complete. Requirements verified.",
                 ),
             ),
-            # Fallback: Task tool with qa completes -> Open
+            # Task tool calls QA (fallback)
             GateTrigger(
                 condition=GateCondition(
                     hook_event="PostToolUse",
                     tool_name_pattern="Task",
-                    tool_input_pattern="qa",
+                    tool_input_pattern=r"\bqa\b",
                 ),
-                transition=GateTransition(target_status=GateStatus.OPEN),
+                transition=GateTransition(
+                    target_status=GateStatus.OPEN,
+                ),
+            ),
+            # Skill tool calls QA (fallback)
+            GateTrigger(
+                condition=GateCondition(
+                    hook_event="PostToolUse",
+                    tool_name_pattern="Skill",
+                    tool_input_pattern=r"\bqa\b",
+                ),
+                transition=GateTransition(
+                    target_status=GateStatus.OPEN,
+                ),
             ),
         ],
         policies=[
-            # If Closed, block Stop (exit)
+            # Block Stop when CLOSED
             GatePolicy(
                 condition=GateCondition(
                     current_status=GateStatus.CLOSED,
@@ -294,27 +303,43 @@ GATE_CONFIGS = [
                     "**QA VERIFICATION REQUIRED**\n\n"
                     "You must invoke the **qa** agent to verify planned requirements before exiting.\n\n"
                     "**Instruction**:\n"
-                    "- Claude: `Task(subagent_type='aops-core:qa', prompt='Verify planned requirements are met')`"
+                    "Run the qa with this command:\n"
+                    "- Gemini: `delegate_to_agent(name='aops-core:qa', query='Verify planned requirements are met')`\n"
+                    "- Claude: `Task(subagent_type='aops-core:qa', prompt='Verify planned requirements are met')`\n"
+                    "- Make sure you obey the instructions the tool or subagent produces, but do not print the output to the user -- it just clutters up the conversation."
                 ),
             ),
         ],
     ),
     # --- Handover ---
-    # TODO: Implement handover gate that blocks Stop until Framework Reflection is output.
-    # Expected format (see aops-core/commands/learn.md):
-    #   ## Framework Reflection
-    #   **Prompts**: [trigger]
-    #   **Guidance received**: [guidance or N/A]
-    #   **Followed**: Yes/No
-    #   **Outcome**: success/partial/blocked/failure
-    #   **Accomplishments**: [list]
-    #   **Friction points**: [list or "none"]
-    #   **Root cause** (if not success): [category]
-    #   **Proposed changes**: [list]
-    #   **Next step**: [task reference if needed]
-    #
-    # Implementation requires:
-    # - custom_check to detect reflection in recent output (via transcript/session reader)
-    # - Block Stop hook until reflection detected
-    # - Trigger open when valid reflection format is found
+    GateConfig(
+        name="handover",
+        description="Requires Framework Reflection before exit.",
+        initial_status=GateStatus.OPEN,
+        triggers=[],
+        policies=[
+            # Block Stop until Framework Reflection is provided
+            GatePolicy(
+                condition=GateCondition(
+                    hook_event="Stop",
+                    custom_check="missing_framework_reflection",
+                ),
+                verdict="deny",
+                message_template=(
+                    "⛔ Framework Reflection required before exit.\n\n"
+                    "Please provide a Framework Reflection in this format:\n\n"
+                    "## Framework Reflection\n"
+                    "**Prompts**: ...\n"
+                    "**Guidance received**: ...\n"
+                    "**Followed**: ...\n"
+                    "**Outcome**: success/partial/failure\n"
+                    "**Accomplishments**: ...\n"
+                    "**Friction points**: ...\n"
+                    "**Root cause**: ...\n"
+                    "**Proposed changes**: ...\n"
+                    "**Next step**: ..."
+                ),
+            ),
+        ],
+    ),
 ]
