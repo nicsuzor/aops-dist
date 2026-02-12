@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 292
+Total files: 294
 
 ## File Tree
 
@@ -45,8 +45,6 @@ hooks/__init__.py
 hooks/autocommit_state.py
 hooks/data/reminders.txt
 hooks/gate_config.py
-hooks/gate_registry.py
-hooks/gates.py
 hooks/generate_transcript.py
 hooks/hooks.json
 hooks/internal_models.py
@@ -79,12 +77,12 @@ hooks/unified_logger.py
 hooks/user_prompt_submit.py
 lib/__init__.py
 lib/axiom_detector.py
+lib/commit_check.py
 lib/event_detector.py
 lib/extract_labor.py
 lib/file_index.py
 lib/gate_model.py
 lib/gate_types.py
-lib/gate_utils.py
 lib/gates/__init__.py
 lib/gates/custom_actions.py
 lib/gates/custom_conditions.py
@@ -92,6 +90,10 @@ lib/gates/definitions.py
 lib/gates/engine.py
 lib/gates/registry.py
 lib/hook_utils.py
+lib/hydration/__init__.py
+lib/hydration/builder.py
+lib/hydration/context_loaders.py
+lib/hydration/skip_check.py
 lib/insights_generator.py
 lib/path_reconstructor.py
 lib/paths.py
