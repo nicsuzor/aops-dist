@@ -150,7 +150,7 @@ GATE_CONFIGS = [
             # Stop check (Uncommitted work)
             GatePolicy(
                 condition=GateCondition(hook_event="Stop", custom_check="has_uncommitted_work"),
-                verdict="deny",
+                verdict="warn",
                 message_template="{block_reason}",
             ),
             # Stop warning (Unpushed commits)
@@ -257,14 +257,31 @@ GATE_CONFIGS = [
     GateConfig(
         name="qa",
         description="Ensures requirements compliance before exit.",
-        initial_status=GateStatus.CLOSED,
+        initial_status=GateStatus.OPEN,
         triggers=[
+            # Start -> Open
+            GateTrigger(
+                condition=GateCondition(hook_event="SessionStart"),
+                transition=GateTransition(target_status=GateStatus.OPEN),
+            ),
             # QA agent verifies requirements -> Open gate
             GateTrigger(
                 condition=GateCondition(hook_event="SubagentStop", subagent_type_pattern="qa"),
                 transition=GateTransition(
                     target_status=GateStatus.OPEN,
                     system_message_template="🧪 QA complete. Requirements verified.",
+                ),
+            ),
+            # Critic once called, requires QA review to ensure compliance before exit
+            GateTrigger(
+                condition=GateCondition(
+                    hook_event="PostToolUse",
+                    tool_name_pattern="Task",
+                    tool_input_pattern=r"\bcritic\b",
+                ),
+                transition=GateTransition(
+                    target_status=GateStatus.CLOSED,
+                    reset_ops_counter=False,
                 ),
             ),
             # Task tool calls QA (fallback)
@@ -326,18 +343,8 @@ GATE_CONFIGS = [
                 ),
                 verdict="deny",
                 message_template=(
-                    "⛔ Framework Reflection required before exit.\n\n"
-                    "Please provide a Framework Reflection in this format:\n\n"
-                    "## Framework Reflection\n"
-                    "**Prompts**: ...\n"
-                    "**Guidance received**: ...\n"
-                    "**Followed**: ...\n"
-                    "**Outcome**: success/partial/failure\n"
-                    "**Accomplishments**: ...\n"
-                    "**Friction points**: ...\n"
-                    "**Root cause**: ...\n"
-                    "**Proposed changes**: ...\n"
-                    "**Next step**: ..."
+                    "⛔ Finalization required before exit.\n\n"
+                    "Please invoke the Handover Skill. The gate will only allow exit once the Handover Skill has completed and the output is successfully parsed in the correct format."
                 ),
             ),
         ],
