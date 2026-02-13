@@ -77,8 +77,8 @@ GEMINI_EVENT_MAP = {
     "BeforeTool": "PreToolUse",
     "AfterTool": "PostToolUse",
     "BeforeAgent": "UserPromptSubmit",  # Mapped to UPS for unified handling
-    "AfterAgent": "AfterAgent",
-    "SessionEnd": "Stop",  # Map SessionEnd to Stop to trigger stop gates
+    "AfterAgent": "Stop",  # This is the event after the agent returns their final response for a turn.
+    "SessionEnd": "SessionEnd",
     "Notification": "Notification",
     "PreCompress": "PreCompact",
     "SubagentStart": "SubagentStart",  # Explicit mapping if Gemini sends it
@@ -201,8 +201,16 @@ class HookRouter:
 
         # 3. Determine Agent ID and Subagent Type
         # Check both payload and persisted session data (for subagent tool calls)
-        agent_id = raw_input.get("agent_id") or raw_input.get("agentId") or self.session_data.get("agent_id")
-        subagent_type = raw_input.get("subagent_type") or raw_input.get("agent_type") or self.session_data.get("subagent_type")
+        agent_id = (
+            raw_input.get("agent_id")
+            or raw_input.get("agentId")
+            or self.session_data.get("agent_id")
+        )
+        subagent_type = (
+            raw_input.get("subagent_type")
+            or raw_input.get("agent_type")
+            or self.session_data.get("subagent_type")
+        )
 
         # Prefer explicit env var if set
         if not subagent_type:
@@ -256,11 +264,9 @@ class HookRouter:
 
         # 8. Persist session data on start or subagent start
         if hook_event in ("SessionStart", "SubagentStart"):
-            persist_session_data({
-                "session_id": session_id,
-                "agent_id": agent_id,
-                "subagent_type": subagent_type
-            })
+            persist_session_data(
+                {"session_id": session_id, "agent_id": agent_id, "subagent_type": subagent_type}
+            )
 
         # 9. Precompute values
         short_hash = get_session_short_hash(session_id)
@@ -311,7 +317,6 @@ class HookRouter:
             cwd=cwd,
             raw_input=raw_input,
         )
-
 
     def execute_hooks(self, ctx: HookContext) -> CanonicalHookOutput:
         """Run all configured gates for the event and merge results.
@@ -538,8 +543,7 @@ class HookRouter:
                             final_verdict = GateVerdict.DENY
                             break  # First deny wins
                         elif (
-                            result.verdict == GateVerdict.WARN
-                            and final_verdict != GateVerdict.DENY
+                            result.verdict == GateVerdict.WARN and final_verdict != GateVerdict.DENY
                         ):
                             final_verdict = GateVerdict.WARN
 

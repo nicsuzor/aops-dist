@@ -1,7 +1,7 @@
 ---
 id: audit
 category: governance
-bases: []
+bases: [base-handover]
 ---
 
 # Audit Workflow
@@ -44,6 +44,8 @@ Skill(skill="audit")
 ```
 Skill(skill="audit", args="session-effectiveness /path/to/transcript.md")
 ```
+
+<!-- check for duplication and remove anything here that is covered in the skill. -->
 
 ## Workflow Phases
 
