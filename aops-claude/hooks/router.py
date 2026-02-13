@@ -35,12 +35,7 @@ try:
     from lib.gate_model import GateResult, GateVerdict
     from lib.gates.registry import GateRegistry
     from lib.hook_utils import is_subagent_session
-    from lib.session_paths import (
-        get_hook_log_path,
-        get_pid_session_map_path,
-        get_session_short_hash,
-        get_session_status_dir,
-    )
+    from lib.session_paths import get_pid_session_map_path, get_session_short_hash
     from lib.session_state import SessionState
 
     # Use relative import if possible, or direct import if run as script
@@ -210,10 +205,6 @@ class HookRouter:
         # 3. Transcript Path / Temp Root
         transcript_path = raw_input.get("transcript_path")
 
-        # Set AOPS_SESSION_STATE_DIR via centralized session_paths
-        status_dir = get_session_status_dir(session_id, raw_input)
-        os.environ["AOPS_SESSION_STATE_DIR"] = str(status_dir)
-
         # Persist session data on start
         if hook_event == "SessionStart":
             persist_session_data({"session_id": session_id})
@@ -259,22 +250,23 @@ class HookRouter:
 
         # Fallback 2: Extract from raw_input (explicitly provided by some hooks)
         if not subagent_type:
-            subagent_type = raw_input.get("subagent_type")
+            subagent_type = raw_input.get("subagent_type") or raw_input.get("agent_type")
 
-        # Fallback 3: Extract from tool_output (for SubagentStop/PostToolUse)
-        if not subagent_type and isinstance(tool_output, dict):
-            subagent_type = tool_output.get("subagent_type")
+        if not is_subagent and (
+            subagent_type or raw_input.get("is_sidechain") or raw_input.get("isSidechain")
+        ):
+            is_subagent = True  # If subagent_type is provided, treat as subagent session
 
         return HookContext(
             session_id=session_id,
             trace_id=trace_id,
             hook_event=hook_event,
-            agent_id=raw_input.get("agentId"),
+            agent_id=raw_input.get("agent_id") or raw_input.get("agentId"),
             slug=raw_input.get("slug"),
-            is_sidechain=is_subagent or raw_input.get("isSidechain"),
+            is_subagent=is_subagent,
+            subagent_type=subagent_type,
             # Precomputed values
             session_short_hash=short_hash,
-            is_subagent=is_subagent,
             # Event Data
             tool_name=tool_name,
             tool_input=tool_input,
@@ -282,7 +274,6 @@ class HookRouter:
             transcript_path=transcript_path,
             cwd=raw_input.get("cwd"),
             raw_input=raw_input,
-            subagent_type=subagent_type,
         )
 
     def execute_hooks(self, ctx: HookContext) -> CanonicalHookOutput:
@@ -307,7 +298,7 @@ class HookRouter:
         self._run_special_handlers(ctx, state, merged_result)
 
         # Skip gate dispatch for subagents (they bypass most gates)
-        if ctx.is_sidechain:
+        if ctx.is_subagent:
             pass  # Special handlers already run, skip gate dispatch
         else:
             # Dispatch to GenericGate methods based on event type
@@ -359,92 +350,20 @@ class HookRouter:
             try:
                 from hooks.session_env_setup import run_session_env_setup
 
-                run_session_env_setup(ctx)
+                init_result = run_session_env_setup(ctx, state)
+                if init_result:
+                    hook_output = self._gate_result_to_canonical(init_result)
+                    self._merge_result(merged_result, hook_output)
+                    if init_result.verdict == GateVerdict.DENY:
+                        return  # Fail-fast on initialization failure
             except Exception as e:
                 print(f"WARNING: session_env_setup error: {e}", file=sys.stderr)
-
-            # Session start initialization (moved from hooks/gates.py)
-            init_result = self._run_session_start_init(ctx, state)
-            if init_result:
-                hook_output = self._gate_result_to_canonical(init_result)
-                self._merge_result(merged_result, hook_output)
-                if init_result.verdict == GateVerdict.DENY:
-                    return  # Fail-fast on initialization failure
 
         # Generate transcript on stop
         if ctx.hook_event == "Stop":
             transcript_path = ctx.raw_input.get("transcript_path")
             if transcript_path:
                 self._run_generate_transcript(transcript_path)
-
-    def _run_session_start_init(self, ctx: HookContext, state: SessionState) -> GateResult | None:
-        """Session start initialization - fail-fast checks and user messages.
-
-        Moved from hooks/gates.py to eliminate wrapper layer.
-        """
-        from lib.session_paths import get_session_file_path
-
-        from lib import hook_utils
-
-        # Use precomputed short_hash from context
-        short_hash = ctx.session_short_hash
-        hook_log_path = get_hook_log_path(ctx.session_id, ctx.raw_input)
-        state_file_path = get_session_file_path(ctx.session_id, input_data=ctx.raw_input)
-
-        # Fail-fast: ensure state file can be written
-        if not state_file_path.exists():
-            try:
-                state.save()
-            except OSError as e:
-                return GateResult(
-                    verdict=GateVerdict.DENY,
-                    system_message=(
-                        f"FAIL-FAST: Cannot write session state file.\n"
-                        f"Path: {state_file_path}\n"
-                        f"Error: {e}\n"
-                        f"Fix: Check directory permissions and disk space."
-                    ),
-                    metadata={"source": "session_start", "error": str(e)},
-                )
-
-        # Gemini-specific: validate hydration temp path infrastructure
-        transcript_path = ctx.raw_input.get("transcript_path", "") if ctx.raw_input else ""
-        if transcript_path and ".gemini" in str(transcript_path):
-            try:
-                hydration_temp_dir = hook_utils.get_hook_temp_dir("hydrator", ctx.raw_input)
-                if not hydration_temp_dir.exists():
-                    hydration_temp_dir.mkdir(parents=True, exist_ok=True)
-            except RuntimeError as e:
-                return GateResult(
-                    verdict=GateVerdict.DENY,
-                    system_message=(
-                        f"STATE ERROR: Hydration temp path missing from session state.\n\n"
-                        f"Details: {e}\n\n"
-                        f"Fix: Ensure Gemini CLI has initialized the project directory."
-                    ),
-                    metadata={"source": "session_start", "error": "gemini_temp_dir_missing"},
-                )
-            except OSError as e:
-                return GateResult(
-                    verdict=GateVerdict.DENY,
-                    system_message=(
-                        f"STATE ERROR: Cannot create hydration temp directory.\n\n"
-                        f"Error: {e}\n\n"
-                        f"Fix: Check directory permissions for ~/.gemini/tmp/"
-                    ),
-                    metadata={"source": "session_start", "error": "gemini_temp_dir_permission"},
-                )
-
-        # Session started messages
-        messages = [
-            f"Session Started: {ctx.session_id} ({short_hash})",
-            f"Version: {state.version}",
-            f"State File: {state_file_path}",
-            f"Hooks log: {hook_log_path}",
-            f"Transcript: {transcript_path}",
-        ]
-
-        return GateResult.allow(system_message="\n".join(messages))
 
     def _run_ntfy_notifier(self, ctx: HookContext, state: SessionState) -> None:
         """Run ntfy push notification handler."""
