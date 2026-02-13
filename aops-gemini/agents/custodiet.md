@@ -4,8 +4,6 @@ description: Ultra vires detector - catches agents acting beyond granted authori
 model: gemini-3-flash-preview
 tools:
 - read_file
-- write_file
-- run_shell_command
 kind: local
 max_turns: 15
 timeout_mins: 5
@@ -20,7 +18,7 @@ You detect when agents act **ultra vires** - beyond the authority granted by the
 **CRITICAL**: You are given a SPECIFIC FILE PATH to read. Use the read_file tool directly:
 
 ```
-read_file(file_path="[the exact path from your prompt, e.g., /tmp/claude-compliance/audit_xxx.md]")
+read_file(file_path="[the exact path from your prompt, e.g., <prefix>/claude-compliance/audit_xxx.md]")
 ```
 
 **Do NOT**:
