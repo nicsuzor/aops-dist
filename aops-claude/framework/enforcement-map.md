@@ -78,7 +78,7 @@ tags: [framework, enforcement, moc]
 | [[streamlit-hot-reloads]]                       | Streamlit Hot Reloads                                 | HEURISTICS.md                                          | SessionStart                   |       |
 | [[use-askuserquestion]]                         | Use AskUserQuestion                                   | HEURISTICS.md                                          | SessionStart                   |       |
 | [[check-skill-conventions]]                     | Check Skill Conventions                               | HEURISTICS.md                                          | SessionStart                   |       |
-| [[deterministic-computation-in-code]]           | Deterministic Computation in Code                     | HEURISTICS.md, prompt-hydrator-context.md              | SessionStart, UserPromptSubmit |       |
+| [[right-tool-for-the-work]]                     | Right Tool for the Work (P#78)                        | HEURISTICS.md, custodiet periodic check                | SessionStart, PostToolUse      |       |
 | [[questions-require-answers]]                   | Questions Need Answers First                          | HEURISTICS.md, custodiet periodic check                | SessionStart, PostToolUse      |       |
 | [[critical-thinking-over-compliance]]           | Critical Thinking Over Compliance                     | HEURISTICS.md                                          | SessionStart                   |       |
 | [[core-first-expansion]]                        | Core-First Expansion                                  | HEURISTICS.md                                          | SessionStart                   |       |
@@ -122,6 +122,7 @@ tags: [framework, enforcement, moc]
 | [[qa-tests-black-box]]                          | QA Tests Are Black-Box                                | HEURISTICS.md                                          | SessionStart, QA execution     | 1b    |
 | [[cli-testing-extended-timeouts]]               | CLI Testing Requires Extended Timeouts                | HEURISTICS.md                                          | SessionStart                   | 1a    |
 | [[plans-get-critic-review]]                     | Plans Get Critic Review, Not Human Approval           | HEURISTICS.md, critic_review guardrail                 | Post plan-filing               | 1b    |
+| [[qa-independent-evidence]]                     | QA Must Produce Independent Evidence                  | HEURISTICS.md, /pull Step 3A.V                         | Before completion              | 1c    |
 
 ## Enforcement Level Summary
 

@@ -335,16 +335,36 @@ description: Working hypotheses validated by evidence.
 
 ---
 
-## Deterministic Computation Stays in Code (P#78)
+## Right Tool for the Work (P#78)
 
-**Statement**: LLMs are bad at counting, aggregation, and numerical computation. Use Python/scripts for deterministic operations; LLMs for judgment, classification, and generation.
+**Statement**: Agents exist to apply judgment. Using deterministic techniques for work that requires reasoning is negligence — the execution equivalent of P#49's prohibition on regex for semantic decisions.
+
+When an agent receives a task that requires evaluation, it must EVALUATE — not mechanically transform. A 1:1 mapping where judgment was warranted is a P#78 violation.
+
+Conversely, purely deterministic operations (counting, aggregation, lossless format conversion) belong in existing tools and inline code, not LLM reasoning.
+
+**Judgment is warranted when**:
+
+- The transformation involves structural decisions (grouping, hierarchy, naming)
+- There is ambiguity in how input maps to output
+- The transformation is lossy (input semantics don't map 1:1 to output format)
+- Trade-offs exist between valid approaches
+
+**Mechanical execution is appropriate when**:
+
+- The transformation can be specified as a pure function with no branching on semantic content
+- No structural decisions, ambiguity, or trade-offs are involved
 
 **Examples**:
 
-- Token counting → transcript_parser.py UsageStats (not LLM)
-- File counts, line counts → glob/wc (not LLM)
-- Data aggregation → pandas/SQL (not LLM)
-- Pattern matching on logs → Python (not LLM)
+- Token counting → existing tool or inline code (not LLM) ✓
+- File counts, line counts → glob/wc (not LLM) ✓
+- Data aggregation → pandas/SQL (not LLM) ✓
+- Lossless format conversion with no structural decisions → inline code (not LLM) ✓
+- Converting constraints to YAML by evaluating structure, grouping, and fitness → agent judgment required ✓
+- Converting constraints to YAML by mechanically mapping bullets to keys → P#78 violation ✗
+- Renaming files per explicit pattern → mechanical ✓
+- Renaming files to "make them clearer" → judgment required ✓
 
 **Corollaries (MCP Tool Design)**:
 
@@ -353,7 +373,7 @@ description: Working hypotheses validated by evidence.
 - Thresholds as **parameters** (agent decides), not hardcoded constants
 - If a tool name contains "candidates", "similar", or "suggest" → wrong boundary, redesign
 
-**Derivation**: LLMs hallucinate numbers and fail at counting. Deterministic operations have exact solutions that code computes reliably. Session logs and hook logs already exist - process them with Python, not inference.
+**Derivation**: Extends P#49 (No Shitty NLP) beyond NLP to all execution. Smart agents exist to apply judgment. Mechanical execution where judgment is warranted wastes the capability and produces worse outcomes. Note: "use existing tools/inline code" for deterministic work — not "create new script files" (P#28 still applies).
 
 ---
 
@@ -756,5 +776,58 @@ mcp__task_manager__complete_task(id=batch_task_id)
 - Unassigned judgment tasks remain in backlog for nic to claim or delegate as needed
 - The `/q` and decompose workflows apply these routing rules when creating tasks
 - `blocked-human` complexity also defaults to unassigned (not auto-assigned to nic)
+- "Mechanical routing" means the task CAN be done without human judgment — not that the agent should skip task analysis. Polecat evaluates WHETHER the task is truly mechanical before executing it AS mechanical. If truly mechanical (no structural decisions, no ambiguity, lossless transformation per P#78 signals), proceed mechanically. If judgment is warranted, apply reasoning even if routed as mechanical.
 
 **Derivation**: Human attention is the scarcest resource. Auto-assigning every judgment task to `nic` defeats the purpose of a backlog - it turns the backlog into nic's inbox. Tasks should be pulled (claimed) rather than pushed (assigned) unless explicitly requested.
+
+---
+
+## QA Must Produce Independent Evidence (P#103)
+
+**Statement**: QA verification must generate NEW evidence, not re-read the agent's own work. "Tests pass" and "code looks correct" are necessary but not sufficient — QA must independently verify the causal chain between fix and problem.
+
+**Corollaries**:
+
+- QA re-reading the same files the implementing agent read is an echo chamber, not verification
+- For bug fixes: QA must trace the failure path independently (what broke → why → does the fix address the actual mechanism)
+- For features: QA must exercise the feature from the user's perspective, not inspect the code
+- Verification depth scales with task complexity: a typo fix needs a glance; a concurrency bug needs end-to-end causal tracing
+- When previous work is inherited (task body documents a fix from another session), the inheriting agent must independently verify the claims, not trust the documentation
+
+**Evidence**: Session 04a50c2f (2026-02-14) — Agent inherited a bug fix, ran tests, spawned QA that re-read the same code, and tried to close. User forced independent causal chain verification.
+
+**Evidence 2**: Session bed2aad5 (2026-02-11) — Agent marked task "done" despite body saying "90% complete."
+
+**Derivation**: P#26 (Verify First) says "check actual state, never assume." P#96 (QA Tests Are Black-Box) says QA should not inspect implementation. Together: QA must independently confirm outcomes, not rubber-stamp the agent's narrative.
+
+---
+
+## Cross-Repo References Use Absolute Paths (P#104)
+
+**Statement**: When task bodies reference files outside the current project, use absolute paths. Relative paths fail when sessions run from a different working directory.
+
+**Corollaries**:
+
+- Task in `aops` project referencing academicOps spec → `/home/nic/src/academicOps/specs/foo.md`, not `specs/foo.md`
+- Sessions in `/home/nic/writing` cannot resolve paths relative to `/home/nic/src/academicOps`
+- Subagents inherit the session's working directory, not the task's project directory
+- When creating tasks from cross-project work (P#83), include absolute paths for all referenced files
+
+**Derivation**: PR 417 retrospective found sessions burning 5-10 tool calls searching wrong directory trees when task bodies used relative paths. Absolute paths are unambiguous regardless of which repo the session starts in.
+
+---
+
+## Validate Architecture Before Decomposing (P#105)
+
+**Statement**: Before decomposing a task into >3 subtasks, present the architectural approach to the user and get confirmation. Do not create implementation subtasks until the design direction is stable.
+
+**Corollaries**:
+
+- Present: what you plan to build, how (agent prompts vs code, patterns), key tradeoffs
+- Use "what you gain / what you lose" format for tradeoff presentation — this enables quick decisions
+- P#72 (Decompose Only When Adding Value) guards against premature per-task decomposition; this heuristic guards against premature project-level decomposition
+- For design discussions: state your recommendation but let the user decide
+
+**Evidence**: PR 417 — agent created 11 implementation tasks for programmatic Python modules. User redirected to agent-based approach within 20 minutes, requiring 9 task cancellations. In another session, agent built an entire consensus module that was immediately rejected.
+
+**Derivation**: Decomposition is cheap to do but expensive to undo (cancelled tasks, wasted context, misleading other sessions). A single confirmation turn prevents hours of rework. P#90 (Match Planning Abstraction) reinforces: when design is unstable, match the planning abstraction rather than jumping to execution.
