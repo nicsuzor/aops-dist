@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 295
+Total files: 294
 
 ## File Tree
 
@@ -290,7 +290,6 @@ workflows/base-handover.md
 workflows/base-investigation.md
 workflows/base-memory-capture.md
 workflows/base-qa.md
-workflows/base-review-checkpoint.md
 workflows/base-task-tracking.md
 workflows/base-tdd.md
 workflows/base-verification.md

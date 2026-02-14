@@ -43,7 +43,6 @@ try:
         from hooks.schemas import (
             CanonicalHookOutput,
             ClaudeGeneralHookOutput,
-            ClaudeHookOutput,
             ClaudeHookSpecificOutput,
             ClaudeStopHookOutput,
             GeminiHookOutput,
@@ -54,7 +53,6 @@ try:
         from schemas import (
             CanonicalHookOutput,
             ClaudeGeneralHookOutput,
-            ClaudeHookOutput,
             ClaudeHookSpecificOutput,
             ClaudeStopHookOutput,
             GeminiHookOutput,
@@ -70,6 +68,26 @@ except ImportError as e:
 
 
 # --- Configuration ---
+
+DEBUG_LOG_PATH = Path("/tmp/cc_hooks_debug.jsonl")
+
+
+def _debug_log_input(raw_input: dict[str, Any], args: Any) -> None:
+    """Append raw hook input to debug JSONL file if DEBUG_HOOKS=1."""
+    if not os.environ.get("DEBUG_HOOKS"):
+        return
+    try:
+        entry = {
+            "ts": datetime.now().isoformat(),
+            "client": getattr(args, "client", None),
+            "event": getattr(args, "event", None),
+            "input": raw_input,
+        }
+        with DEBUG_LOG_PATH.open("a") as f:
+            f.write(json.dumps(entry) + "\n")
+    except Exception as e:
+        print(f"DEBUG_LOG error: {e}", file=sys.stderr)
+
 
 # Event mapping: Gemini -> Claude (internal normalization)
 GEMINI_EVENT_MAP = {
@@ -162,19 +180,21 @@ def persist_session_data(data: dict[str, Any]) -> None:
 class HookRouter:
     # Global bypass for compliance subagents (POLICIES ONLY)
     # We still run triggers for these agents so gate states update correctly.
-    _COMPLIANCE_SUBAGENT_TYPES = frozenset({
-        "hydrator",
-        "prompt-hydrator",
-        "aops-core:prompt-hydrator",
-        "custodiet",
-        "aops-core:custodiet",
-        "qa",
-        "aops-core:qa",
-        "audit",
-        "aops-core:audit",
-        "aops-core:butler",
-        "butler",
-    })
+    _COMPLIANCE_SUBAGENT_TYPES = frozenset(
+        {
+            "hydrator",
+            "prompt-hydrator",
+            "aops-core:prompt-hydrator",
+            "custodiet",
+            "aops-core:custodiet",
+            "qa",
+            "aops-core:qa",
+            "audit",
+            "aops-core:audit",
+            "aops-core:butler",
+            "butler",
+        }
+    )
 
     def __init__(self):
         self.session_data = get_session_data()
@@ -199,7 +219,7 @@ class HookRouter:
         if gemini_event:
             hook_event = GEMINI_EVENT_MAP.get(gemini_event, gemini_event)
         else:
-            raw_event = raw_input.get("hook_event_name")
+            raw_event = raw_input.get("hook_event_name") or ""
             hook_event = GEMINI_EVENT_MAP.get(raw_event, raw_event)
 
         # 2. Determine Session ID
@@ -526,7 +546,8 @@ class HookRouter:
         - SubagentStop -> gate.on_subagent_stop()
         """
         is_compliance_agent = ctx.is_subagent and (
-            state.state.get("hydrator_active") or ctx.subagent_type in self._COMPLIANCE_SUBAGENT_TYPES
+            state.state.get("hydrator_active")
+            or ctx.subagent_type in self._COMPLIANCE_SUBAGENT_TYPES
         )
 
         messages = []
@@ -658,7 +679,9 @@ class HookRouter:
         out.metadata = result.metadata
         return out
 
-    def output_for_claude(self, result: CanonicalHookOutput, event: str) -> ClaudeHookOutput:
+    def output_for_claude(
+        self, result: CanonicalHookOutput, event: str
+    ) -> ClaudeGeneralHookOutput | ClaudeStopHookOutput:
         """Format for Claude Code."""
         if event == "Stop" or event == "SessionEnd":
             output = ClaudeStopHookOutput()
@@ -739,6 +762,9 @@ def main():
                 raw_input = json.loads(input_data)
     except Exception as e:
         print(f"WARNING: Failed to read stdin: {e}", file=sys.stderr)
+
+    # Debug log all input (enable with DEBUG_HOOKS=1)
+    _debug_log_input(raw_input, args)
 
     # Detect Invocation Mode, relying on explicit --client flag
     if args.client:
