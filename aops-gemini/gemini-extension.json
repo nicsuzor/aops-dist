@@ -1,6 +1,6 @@
 {
   "name": "aops-core",
-  "version": "0.2.8.dev245",
+  "version": "0.2.8.pre1",
   "description": "AcademicOps Framework Extension for Gemini CLI - skills, agents, hooks, and tools for research workflow automation",
   "contextFileName": "GEMINI.md",
   "mcpServers": {
@@ -29,6 +29,5 @@
         "ACA_DATA": "${ACA_DATA}"
       }
     }
-  },
-  "preRelease": true
+  }
 }
