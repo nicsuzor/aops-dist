@@ -3,7 +3,6 @@ name: prompt-hydrator
 description: Transform terse prompts into execution plans with scope detection, task
   routing, and deferred work capture
 model: gemini-3-flash-preview
-color: cyan
 tools:
 - read_file
 - memory__retrieve_memory

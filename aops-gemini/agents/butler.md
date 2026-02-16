@@ -6,7 +6,6 @@ description: Use this agent when the user needs help managing, coordinating, or 
   components, tracking progress, or discussing the vision and state of the academic
   automation system.
 model: gemini-3-pro-preview
-color: purple
 tools:
 - read_file
 - write_file
