@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 295
+Total files: 296
 
 ## File Tree
 
@@ -26,6 +26,7 @@ REMINDERS.md
 RULES.md
 SKILLS.md
 WORKFLOWS.md
+agents/butler.md
 agents/critic.md
 agents/custodiet.md
 agents/effectual-planner.md

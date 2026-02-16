@@ -2,6 +2,7 @@
 name: qa
 description: Independent end-to-end verification before completion
 model: opus
+color: green
 tools: Read, Bash
 ---
 
