@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 297
+Total files: 305
 
 ## File Tree
 
@@ -254,6 +254,10 @@ skills/pdf/assets/fonts/RobotoMonoNerdFont-Italic.ttf
 skills/pdf/assets/fonts/RobotoMonoNerdFont-Regular.ttf
 skills/pdf/assets/letter-style.css
 skills/pdf/scripts/generate_pdf.py
+skills/planning/SKILL.md
+skills/planning/references/dependency-types.md
+skills/planning/references/knowledge-flow.md
+skills/planning/references/spike-patterns.md
 skills/python-dev/SKILL.md
 skills/python-dev/references/bigquery.md
 skills/python-dev/references/code-quality.md
@@ -266,6 +270,11 @@ skills/python-dev/references/pandas.md
 skills/python-dev/references/testing.md
 skills/python-dev/references/type-safety.md
 skills/qa/SKILL.md
+skills/qa/references/acceptance-testing.md
+skills/qa/references/integration-validation.md
+skills/qa/references/qualitative-assessment.md
+skills/qa/references/quick-verification.md
+skills/qa/references/system-design-qa.md
 skills/relax/skill.md
 skills/remember/SKILL.md
 skills/remember/references/detail-level-guide.md
@@ -279,6 +288,7 @@ skills/session-insights/scripts/find_pending.py
 skills/session-insights/scripts/merge_insights.py
 skills/session-insights/scripts/prepare_prompt.py
 skills/session-insights/scripts/process_response.py
+skills/strategy/SKILL.md
 skills/swarm-supervisor/SKILL.md
 skills/swarm-supervisor/instructions/decomposition-and-review.md
 skills/swarm-supervisor/instructions/knowledge-capture.md
@@ -305,13 +315,11 @@ workflows/email-triage.md
 workflows/external-batch-submission.md
 workflows/feature-dev.md
 workflows/framework-gate.md
-workflows/github-issue-cycle.md
 workflows/interactive-followup.md
 workflows/peer-review.md
 workflows/qa.md
 workflows/reference-letter.md
 workflows/reflect.md
 workflows/simple-question.md
-workflows/strategy.md
 workflows/worktree-merge.md
 ```
