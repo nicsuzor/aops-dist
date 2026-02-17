@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 295
+Total files: 297
 
 ## File Tree
 
@@ -116,6 +116,7 @@ lib/template_registry.py
 lib/transcript_error_analyzer.py
 lib/transcript_parser.py
 mcp_servers/__init__.py
+mcp_servers/memory_proxy.py
 mcp_servers/tasks_server.py
 plugin.json
 pyproject.toml
@@ -159,6 +160,7 @@ skills/convert-to-md/scripts/pdf2md.py
 skills/daily/SKILL.md
 skills/daily/instructions/briefing-and-triage.md
 skills/daily/instructions/focus-and-recommendations.md
+skills/daily/instructions/mobile-capture-triage.md
 skills/daily/instructions/progress-sync.md
 skills/daily/instructions/sync-workflow.md
 skills/daily/instructions/work-summary.md

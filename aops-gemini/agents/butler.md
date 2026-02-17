@@ -10,7 +10,7 @@ tools:
 - read_file
 - write_file
 - glob
-- grep
+- search_file_content
 - task_manager__create_task
 - task_manager__get_task
 - task_manager__update_task
