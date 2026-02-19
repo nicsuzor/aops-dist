@@ -105,10 +105,7 @@ class SessionState(BaseModel):
         # Initialize default gate states
         default_gates = {
             "hydration": GateStatus.OPEN,
-            "task": GateStatus.OPEN,
-            "critic": GateStatus.OPEN,
             "custodiet": GateStatus.OPEN,
-            "qa": GateStatus.OPEN,
             "handover": GateStatus.OPEN,
         }
 

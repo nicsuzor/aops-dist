@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 306
+Total files: 288
 
 ## File Tree
 
@@ -27,21 +27,19 @@ RULES.md
 SKILLS.md
 WORKFLOWS.md
 agents/butler.md
-agents/critic.md
+agents/custodiet-reviewer.md
 agents/custodiet.md
 agents/effectual-planner.md
+agents/hydrator-reviewer.md
 agents/prompt-hydrator.md
 agents/qa.md
-commands/acceptance_test.toml
 commands/aops.toml
 commands/bump.toml
-commands/diag.toml
 commands/dump.toml
 commands/learn.toml
-commands/log.toml
+commands/path.toml
 commands/pull.toml
 commands/q.toml
-commands/work.toml
 framework/enforcement-map.md
 gemini-extension.json
 hooks/__init__.py
@@ -59,7 +57,6 @@ hooks/session_end_commit_check.py
 hooks/session_env_setup.py
 hooks/task_binding.py
 hooks/templates/README.md
-hooks/templates/critic-context.md
 hooks/templates/custodiet-audit.md
 hooks/templates/custodiet-context.md
 hooks/templates/custodiet-instruction.md
@@ -71,11 +68,8 @@ hooks/templates/prompt-hydration-instruction.md
 hooks/templates/prompt-hydrator-context.md
 hooks/templates/qa-context.md
 hooks/templates/simple-question-instruction.md
-hooks/templates/stop-gate-critic.md
 hooks/templates/stop-gate-handover-block.md
 hooks/templates/stop-gate-handover-warn.md
-hooks/templates/task-gate-block.md
-hooks/templates/task-gate-warn.md
 hooks/templates/tool-gate-message.md
 hooks/unified_logger.py
 hooks/user_prompt_submit.py
@@ -151,10 +145,9 @@ skills/analyst/references/test_selection_guide.md
 skills/analyst/scripts/assumption_checks.py
 skills/annotations/SKILL.md
 skills/audit/SKILL.md
+skills/audit/references/acceptance-tests.md
 skills/audit/references/output-targets.md
 skills/audit/references/report-format.md
-skills/audit/scripts/build_reference_map.py
-skills/audit/scripts/find_orphans.py
 skills/audit/workflows/session-effectiveness.md
 skills/convert-to-md/SKILL.md
 skills/convert-to-md/scripts/pdf2md.py
@@ -227,21 +220,11 @@ skills/framework/workflows/08-decision-briefing.md
 skills/framework/workflows/09-session-hook-forensics.md
 skills/garden/SKILL.md
 skills/garden/scripts/lint_frontmatter.py
-skills/handover/SKILL.md
 skills/hdr/SKILL.md
 skills/hdr/workflows/reference-letter.md
-skills/health-check/SKILL.md
-skills/health-check/checks/custodiet.md
-skills/health-check/checks/gates.md
-skills/health-check/checks/hydrator.md
-skills/health-check/checks/qa.md
-skills/health-check/output/aggregation.md
 skills/hypervisor/SKILL.md
 skills/hypervisor/prompts/gemini-task-worker.md
 skills/hypervisor/scripts/batch_worker.py
-skills/log/SKILL.md
-skills/log/test_log_skill_background.py
-skills/log/workflows/log-observation.md
 skills/pdf/SKILL.md
 skills/pdf/assets/academic-style.css
 skills/pdf/assets/fonts/Roboto-Bold.ttf
@@ -308,7 +291,6 @@ workflows/base-task-tracking.md
 workflows/base-tdd.md
 workflows/base-verification.md
 workflows/constraint-check.md
-workflows/critic.md
 workflows/decompose.md
 workflows/email-capture.md
 workflows/email-reply.md

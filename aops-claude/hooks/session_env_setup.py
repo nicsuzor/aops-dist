@@ -28,7 +28,7 @@ from lib.session_state import SessionState
 from hooks.schemas import HookContext
 
 # Gate enforcement mode environment variables
-GATE_MODE_VARS = ("CUSTODIET_MODE", "TASK_GATE_MODE", "HYDRATION_GATE_MODE")
+GATE_MODE_VARS = ("CUSTODIET_MODE", "HYDRATION_GATE_MODE", "TASK_GATE_MODE")
 DEFAULT_GATE_MODE = "warn"
 
 
@@ -54,7 +54,7 @@ def run_session_env_setup(ctx: HookContext, state: SessionState) -> GateResult |
     - PYTHONPATH (includes aops-core)
     - AOPS_SESSION_STATE_DIR
     - AOPS_HOOK_LOG_PATH
-    - Default gate enforcement modes (CUSTODIET_MODE, TASK_GATE_MODE, HYDRATION_GATE_MODE)
+    - Default gate enforcement modes (CUSTODIET_MODE, HYDRATION_GATE_MODE)
     - Other placeholder variables from original script
 
     """
@@ -124,6 +124,35 @@ def run_session_env_setup(ctx: HookContext, state: SessionState) -> GateResult |
         f"Hooks log: {hook_log_path}",
         f"Transcript: {transcript_path}",
     ]
+
+    # Pull ACA_DATA to ensure fresh state at session start
+    aca_data = os.environ.get("ACA_DATA")
+    if aca_data:
+        try:
+            from hooks.autocommit_state import (
+                can_sync,
+                fetch_and_check_divergence,
+                pull_rebase_if_behind,
+            )
+
+            aca_path = Path(aca_data)
+            if aca_path.exists() and (aca_path / ".git").exists():
+                syncable, reason = can_sync(aca_path)
+                if syncable:
+                    is_behind, count, fetch_err = fetch_and_check_divergence(aca_path)
+                    if fetch_err:
+                        messages.append(f"ACA_DATA sync skipped: {fetch_err}")
+                    elif is_behind:
+                        ok, sync_msg = pull_rebase_if_behind(aca_path)
+                        if ok:
+                            messages.append(f"ACA_DATA: pulled {count} commits")
+                        else:
+                            messages.append(f"ACA_DATA sync failed: {sync_msg}")
+                    # else: already up-to-date, no message needed
+                else:
+                    messages.append(f"ACA_DATA sync skipped: {reason}")
+        except Exception as e:
+            messages.append(f"ACA_DATA sync error: {e}")
 
     # 1. Persist Session ID
     if ctx.session_id:

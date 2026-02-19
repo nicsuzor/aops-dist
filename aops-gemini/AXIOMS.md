@@ -42,7 +42,7 @@ Complete the task requested, then STOP. Don't be so fucking eager.
 - User asks to CREATE/SCHEDULE a task → Create the task, stop. Scheduling ≠ executing.
 - Find related issues → Report, don't fix. "I'll just xyz" → Wait for direction.
 - Collaborative mode → Execute ONE step, then wait.
-- Task complete → invoke /handover → session ends.
+- Task complete → invoke /dump → session ends.
 - **HALT signals**: "we'll halt", "then stop", "just plan", "and halt" = STOP.
 
 **Derivation**: Scope creep destroys focus and introduces unreviewed changes. Process and guardrails exist to reduce catastrophic failure. The phrase "I'll just..." is the warning sign - if you catch yourself saying it, STOP.
@@ -87,6 +87,11 @@ Skills MUST NOT contain dynamic data. All mutable state lives in $ACA_DATA.
 
 Git is the backup system. NEVER create backup files (`.bak`, `_old`, `_ARCHIVED_*`). Edit directly, rely on git. Commit AND push after completing logical work units. Commit promptly — no hesitation.
 
+**Corollaries**:
+
+- After completing work, always: commit → push to branch → file PR. Review happens at PR integration, not before commit. Never leave work uncommitted or ask the user to commit for you.
+- Never assign review/commit tasks to `nic`. The PR process IS the review mechanism.
+
 ## No Workarounds (P#25)
 
 If tooling or instructions don't work PRECISELY, log the failure and HALT. NEVER use `--no-verify`, `--force`, or skip flags.
@@ -103,6 +108,7 @@ Check actual state, never assume.
 - Before `git push`, verify push destination matches intent.
 - When generating artifacts, EXAMINE the output. "File created successfully" is not verification.
 - When investigating external systems, read ALL available primary evidence before drawing conclusions.
+- Before skipping work due to "missing" environment capabilities (credentials, APIs, services), verify they're actually absent.
 
 **Derivation**: Assumptions cause cascading failures. Verification catches problems early. The onus is on YOU to discharge the burden of proof. "Probably" and "should" are red flags that mean you haven't actually checked.
 

@@ -104,6 +104,10 @@ Create child tasks only when they add information beyond the parent's bullet poi
 
 Every task MUST connect to the hierarchy: `action → task → epic → project → goal`. Disconnected tasks are violations.
 
+**Corollaries**:
+
+- Task hierarchy is defined by graph relationships (`parent`, `depends_on`), not filesystem paths. Directory layout is an implementation detail of task storage.
+
 ## User System Expertise > Agent Hypotheses (P#74)
 
 When user makes specific assertions about their own codebase, trust the assertion and verify with ONE minimal test. Do NOT spawn investigation to "validate" user claims.
@@ -138,13 +142,13 @@ Use `fd` for file finding operations instead of `ls | grep/tail` pipelines.
 
 Bug fixes must not remove functionality required by acceptance criteria.
 
-## Spike Output Goes to Task Graph (P#81)
+## Spike Output Goes to Task Graph or GitHub (P#81)
 
-Spike/learn task output belongs in the task graph (task body, parent epic), not random files.
+Spike/learn output belongs in the task graph (task body, parent epic) or GitHub issues, not random files.
 
-## Mandatory Reproduction Tests (P#82)
+## Mandatory Reproduction Tests for Fixes (P#82)
 
-Every framework bug fix MUST be preceded by a failing reproduction test case.
+Every framework bug fix MUST be preceded by a failing reproduction test case. This applies when implementing a fix, not necessarily during the initial async capture (/learn).
 
 ## Make Cross-Project Dependencies Explicit (P#83)
 
@@ -181,9 +185,9 @@ When user requests content "an LLM will orchestrate/execute", create content for
 
 When user is deconstructing/planning, match their level of abstraction. Don't fill in blanks until they signal readiness for specifics.
 
-## Verify Non-Duplication Before Batch Create (P#91)
+## Verify Non-Duplication Before Create (P#91)
 
-Before creating tasks from batch input, cross-reference against existing task titles to avoid duplicates.
+Before creating ANY task, search existing tasks (`search_tasks`) for similar titles. This applies to single creates, not just batch operations.
 
 ## Run Python via uv (P#93)
 
@@ -195,7 +199,11 @@ A batch task is not complete until all spawned workers have finished. "Fire-and-
 
 ## Subagent Verdicts Are Binding (P#95)
 
-When a subagent (critic, custodiet, qa) returns a HALT or REVISE verdict, the main agent MUST stop and address the issue.
+When a subagent (custodiet, qa) returns a HALT or REVISE verdict, the main agent MUST stop and address the issue.
+
+**Corollaries**:
+
+- When custodiet blocks work as out-of-scope, capture the blocked improvement as a new task before reverting. Useful work should be deferred, not lost.
 
 **Derivation**: P#9 (Fail-Fast Agents) requires stopping when tools fail. Subagents are tools. Their failure verdicts must be respected.
 
@@ -214,10 +222,6 @@ When testing CLI tools via Bash, use `timeout: 180000` (3 minutes) minimum.
 ## Centralized Git Versioning (P#99)
 
 Versioning logic MUST be centralized in a single source of truth.
-
-## Plans Get Critic Review, Not Human Approval (P#100)
-
-After filing a plan or decomposition, the next step is automated critic review. Human approval happens at PR, not at plan filing.
 
 ## Prefer Deep Functional Nesting Over Flat Projects (P#101)
 
@@ -271,3 +275,9 @@ This does NOT apply when:
 - An axiom might be at risk
 
 **Derivation**: Extends P#59 (Action Over Clarification) from task selection to implementation decisions. P#102 corollary establishes that pre-routing to human based on "this involves design choices" is premature. P#78 establishes that classification is LLM work. If an agent can classify one option as superior, asking the human is wasted attention.
+
+## Standard Tooling Over Framework Gates (P#105)
+
+When proposing enforcement for repo-level rules (file structure, naming, content format), prefer standard git tooling (pre-commit hooks, CI checks) over framework-internal mechanisms (PreToolUse gates, custom hooks). Framework gates control agent behavior in real-time; repo structure rules belong in git.
+
+**Derivation**: Extends P#5 (Do One Thing) to enforcement design. The enforcement-map.md already shows the pattern: `data-markdown-only`, `check-orphan-files`, `check-skill-line-count` are all pre-commit hooks. New rules of the same kind should follow the same pattern, not escalate to a more complex enforcement layer.

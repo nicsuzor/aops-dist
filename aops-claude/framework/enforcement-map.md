@@ -38,6 +38,7 @@ tags: [framework, enforcement, moc]
 | [[no-workarounds]]                          | No Workarounds                  | fail_fast_watchdog.py                                                                        | PostToolUse            |           |
 | [[verify-first]]                            | Verify First                    | TodoWrite checkpoint                                                                         | During execution       |           |
 | [[verify-first]]                            | Verify Push Target              | AXIOMS.md corollary: explicit refspec for git push                                           | Before git push        | 1c        |
+| [[trust-version-control]]                   | Always File PR                  | AXIOMS.md P#24 corollary: commit → push → PR. Never leave work uncommitted.                 | Stop                   | 1c        |
 | [[verify-first]]                            | Write-Without-Read Check        | axiom_enforcer (DISABLED)                                                                    | PreToolUse             |           |
 | [[verify-first]], [[dont-make-shit-up]]     | Check Existing Automation First | prompt-hydrator-context.md Step 1 (check .github/workflows/ before manual execution)         | UserPromptSubmit       | 1c        |
 | [[verify-first]]                            | Primary Evidence Before Conclusions | AXIOMS.md P#26 corollary (read all comments/reviews/logs before concluding)                | SessionStart           | 1a        |
@@ -45,7 +46,7 @@ tags: [framework, enforcement, moc]
 | [[write-for-long-term]]                     | Write for Long Term             | AXIOMS.md                                                                                    | SessionStart           |           |
 | [[maintain-relational-integrity]]           | Relational Integrity            | wikilink conventions                                                                         | Pre-commit (planned)   |           |
 | [[nothing-is-someone-elses-responsibility]] | Nothing Is Someone Else's       | AXIOMS.md                                                                                    | SessionStart           |           |
-| [[acceptance-criteria-own-success]]         | Acceptance Criteria Own Success | /qa skill enforcement                                                                        | Stop                   |           |
+| [[acceptance-criteria-own-success]]         | Acceptance Criteria Own Success | /qa skill (on-demand)                                                                        | Stop                   |           |
 | [[plan-first-development]]                  | Plan-First Development          | EnterPlanMode tool                                                                           | Before coding          |           |
 | [[research-data-immutable]]                 | Research Data Immutable         | settings.json denies records/**                                                              | PreToolUse             |           |
 | [[just-in-time-context]]                    | Just-In-Time Context            | sessionstart_load_axioms.py                                                                  | SessionStart           |           |
@@ -53,8 +54,8 @@ tags: [framework, enforcement, moc]
 | [[feedback-loops-for-uncertainty]]          | Feedback Loops                  | AXIOMS.md                                                                                    | SessionStart           |           |
 | [[current-state-machine]]                   | Current State Machine           | autocommit_state.py (auto-commit+push)                                                       | PostToolUse            |           |
 | [[one-spec-per-feature]]                    | One Spec Per Feature            | AXIOMS.md                                                                                    | SessionStart           |           |
-| [[mandatory-handover]]                      | Mandatory Handover Workflow     | prompt-hydrator-context.md (Session Completion Rules section), handover SKILL.md Step 1.5    | UserPromptSubmit, Stop |           |
-| [[capture-outstanding-work]]                | Capture Outstanding Work        | handover SKILL.md Step 1.5 (create follow-up tasks for incomplete/deferred work)             | Stop                   |           |
+| [[mandatory-handover]]                      | Mandatory Handover Workflow     | prompt-hydrator-context.md (Session Completion Rules section), dump.md Step 2                | UserPromptSubmit, Stop |           |
+| [[capture-outstanding-work]]                | Capture Outstanding Work        | dump.md Step 2 (create follow-up tasks for incomplete/deferred work)                         | Stop                   |           |
 | [[explicit-approval-costly-ops]]            | Costly Operations Approval      | external-batch-submission.md workflow + AskUserQuestion before batch submit                  | During execution       |           |
 
 ## Heuristic → Enforcement Mapping
@@ -74,7 +75,6 @@ tags: [framework, enforcement, moc]
 | [[no-promises-without-instructions]]            | No Promises Without Instructions                      | HEURISTICS.md                                          | SessionStart                   |       |
 | [[semantic-search-over-keyword]]                | Semantic Search Over Keyword                          | HEURISTICS.md                                          | SessionStart                   |       |
 | [[edit-source-run-setup]]                       | Edit Source, Run Setup                                | HEURISTICS.md                                          | SessionStart                   |       |
-| [[mandatory-second-opinion]]                    | Mandatory Second Opinion                              | planner agent invokes critic                           | Planning                       |       |
 | [[streamlit-hot-reloads]]                       | Streamlit Hot Reloads                                 | HEURISTICS.md                                          | SessionStart                   |       |
 | [[use-askuserquestion]]                         | Use AskUserQuestion                                   | HEURISTICS.md                                          | SessionStart                   |       |
 | [[check-skill-conventions]]                     | Check Skill Conventions                               | HEURISTICS.md                                          | SessionStart                   |       |
@@ -88,7 +88,7 @@ tags: [framework, enforcement, moc]
 | [[user-centric-acceptance]]                     | User-Centric Acceptance                               | HEURISTICS.md                                          | SessionStart                   |       |
 | [[semantic-vs-episodic-storage]]                | Semantic vs Episodic Storage                          | HEURISTICS.md, hydrator advice, custodiet check        | SessionStart, PostToolUse      |       |
 | [[debug-dont-redesign]]                         | Debug, Don't Redesign                                 | HEURISTICS.md                                          | SessionStart                   |       |
-| [[mandatory-acceptance-testing]]                | Mandatory Acceptance Testing                          | /qa skill                                              | Stop                           |       |
+| [[mandatory-acceptance-testing]]                | Mandatory Acceptance Testing                          | /qa skill (on-demand)                                  | Stop                           |       |
 | [[todowrite-vs-persistent-tasks]]               | TodoWrite vs Persistent Tasks                         | HEURISTICS.md                                          | SessionStart                   |       |
 | [[design-first-not-constraint-first]]           | Design-First                                          | HEURISTICS.md                                          | SessionStart                   |       |
 | [[no-llm-calls-in-hooks]]                       | No LLM Calls in Hooks                                 | HEURISTICS.md                                          | SessionStart                   |       |
@@ -97,7 +97,6 @@ tags: [framework, enforcement, moc]
 | [[semantic-link-density]]                       | Semantic Link Density                                 | check_orphan_files.py                                  | Pre-commit                     |       |
 | [[spec-first-file-modification]]                | Spec-First File Modification                          | HEURISTICS.md                                          | SessionStart                   |       |
 | [[file-category-classification]]                | File Category Classification                          | check_file_taxonomy.py                                 | Pre-commit                     |       |
-| [[llm-semantic-evaluation]]                     | LLM Semantic Evaluation                               | PR template checklist, critic agent                    | PR Review                      |       |
 | [[full-evidence-for-validation]]                | Full Evidence for Validation                          | @pytest.mark.demo requirement                          | Test design                    |       |
 | [[real-fixtures-over-contrived]]                | Real Fixtures Over Contrived                          | docs/testing-patterns.md                               | Test design                    |       |
 | [[execution-over-inspection]]                   | Execution Over Inspection                             | framework skill compliance protocol                    | Skill invocation               |       |
@@ -106,7 +105,7 @@ tags: [framework, enforcement, moc]
 | [[enforcement-changes-require-rules-md-update]] | Enforcement Changes Require enforcement-map.md Update | HEURISTICS.md                                          | SessionStart                   |       |
 | [[just-in-time-information]]                    | Just-In-Time Information                              | HEURISTICS.md                                          | SessionStart                   |       |
 | [[summarize-tool-responses]]                    | Summarize Tool Responses                              | HEURISTICS.md                                          | SessionStart                   | 1a    |
-| [[structured-justification-format]]             | Structured Justification Format                       | /learn command, PreToolUse hook (planned)              | Before framework edit          | 1d    |
+| [[structured-justification-format]]             | Structured Justification Format                       | PreToolUse hook (planned)                              | Before framework edit          | 1d    |
 | [[extract-implies-persist]]                     | Extract Implies Persist in PKM Context                | prompt-hydrator guidance                               | UserPromptSubmit               |       |
 | [[background-agent-visibility]]                 | Background Agent Visibility                           | HEURISTICS.md                                          | SessionStart                   |       |
 | [[imminent-deadline-surfacing]]                 | Imminent Deadline Surfacing                           | daily skill DEADLINE TODAY category                    | /daily invocation              | 1a    |
@@ -116,15 +115,15 @@ tags: [framework, enforcement, moc]
 | [[preserve-pre-existing-content]]               | Preserve Pre-Existing Content                         | HEURISTICS.md                                          | SessionStart                   |       |
 | [[user-intent-discovery]]                       | User Intent Discovery Before Implementation           | HEURISTICS.md, prompt-hydrator guidance                | SessionStart, UserPromptSubmit |       |
 | [[user-intent-discovery]]                       | Slash Command Args Intent Parsing                     | skip_check.py: multi-word args trigger hydration       | UserPromptSubmit               | 3b    |
-| [[verify-non-duplication-batch-create]]         | Verify Non-Duplication Before Batch Create            | HEURISTICS.md, triage-email workflow                   | SessionStart, batch operations | 1a    |
+| [[verify-non-duplication-batch-create]]         | Verify Non-Duplication Before Create                  | HEURISTICS.md, triage-email workflow                   | SessionStart, task creation    | 1a    |
 | [[run-python-via-uv]]                           | Run Python via uv                                     | HEURISTICS.md                                          | SessionStart                   | 1a    |
 | [[protect-dist-directory]]                      | Protect dist/ Directory                               | .agent/rules/HEURISTICS.md, policy_enforcer.py         | SessionStart, PreToolUse       | 1a    |
 | [[subagent-verdicts-binding]]                   | Subagent Verdicts Are Binding                         | HEURISTICS.md                                          | SessionStart, SubagentStop     | 1a    |
 | [[qa-tests-black-box]]                          | QA Tests Are Black-Box                                | HEURISTICS.md                                          | SessionStart, QA execution     | 1b    |
 | [[cli-testing-extended-timeouts]]               | CLI Testing Requires Extended Timeouts                | HEURISTICS.md                                          | SessionStart                   | 1a    |
-| [[plans-get-critic-review]]                     | Plans Get Critic Review, Not Human Approval           | HEURISTICS.md, critic_review guardrail                 | Post plan-filing               | 1b    |
 | [[explain-dont-ask]]                            | Explain, Don't Ask (P#104)                            | HEURISTICS.md                                          | SessionStart                   |       |
 | [[qa-independent-evidence]]                     | QA Must Produce Independent Evidence                  | HEURISTICS.md, /pull Step 3A.V                         | Before completion              | 1c    |
+| [[standard-tooling-over-framework-gates]]       | Standard Tooling Over Framework Gates (P#105)         | HEURISTICS.md                                          | SessionStart                   | 1a    |
 
 ## Enforcement Level Summary
 
@@ -212,11 +211,9 @@ These guardrails are applied by [[prompt-hydration]] based on task classificatio
 | `answer_only`             | [[questions-require-answers]]                                                                        | Jumping to implementation when asked a question             |
 | `require_skill`           | [[skill-first-action]]                                                                               | Skipping skill for domain work                              |
 | `plan_mode`               | [[plan-first-development]]                                                                           | Framework changes without approval                          |
-| `require_acceptance_test` | [[mandatory-acceptance-testing]]                                                                     | Claiming complete without e2e test                          |
 | `quote_errors_exactly`    | [[error-messages-primary-evidence]]                                                                  | Paraphrasing errors                                         |
 | `fix_within_design`       | [[debug-dont-redesign]]                                                                              | Redesigning during debugging                                |
 | `follow_literally`        | [[explicit-instructions-override]]                                                                   | Interpreting user instructions                              |
-| `critic_review`           | [[mandatory-second-opinion]]                                                                         | Presenting plans without review                             |
 | `use_todowrite`           | [[todowrite-vs-persistent-tasks]]                                                                    | Losing track of steps                                       |
 | `criteria_gate`           | [[acceptance-criteria-own-success]], [[no-promises-without-instructions]], [[edit-source-run-setup]] | Missing acceptance criteria                                 |
 | `capture_insights`        | [[semantic-vs-episodic-storage]]                                                                     | Losing discoveries (bd for ops, remember for knowledge)     |
@@ -227,12 +224,12 @@ These guardrails are applied by [[prompt-hydration]] based on task classificatio
 
 | Task Type   | Guardrails Applied                                                                                                                        |
 | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `framework` | framework_gate, verify_before_complete, require_skill:framework, plan_mode, critic_review, criteria_gate, use_todowrite, capture_insights |
+| `framework` | framework_gate, verify_before_complete, require_skill:framework, plan_mode, criteria_gate, use_todowrite, capture_insights                |
 | `cc_hook`   | verify_before_complete, require_skill:plugin-dev:hook-development, plan_mode, criteria_gate, use_todowrite, hook_docs_first               |
 | `cc_mcp`    | verify_before_complete, require_skill:plugin-dev:mcp-integration, plan_mode, criteria_gate, use_todowrite                                 |
 | `debug`     | verify_before_complete, quote_errors_exactly, fix_within_design, criteria_gate, use_todowrite, capture_insights                           |
-| `feature`   | verify_before_complete, require_acceptance_test, criteria_gate, use_todowrite, capture_insights                                           |
-| `python`    | verify_before_complete, require_skill:python-dev, require_acceptance_test, criteria_gate, use_todowrite                                   |
+| `feature`   | verify_before_complete, criteria_gate, use_todowrite, capture_insights                                           |
+| `python`    | verify_before_complete, require_skill:python-dev, criteria_gate, use_todowrite                                   |
 | `question`  | answer_only                                                                                                                               |
 | `persist`   | require_skill:remember                                                                                                                    |
 | `analysis`  | require_skill:analyst, criteria_gate, use_todowrite, capture_insights                                                                     |
@@ -310,7 +307,6 @@ The TASK GATE consolidates multiple enforcement concerns into a single PreToolUs
 
 - Task binding (work tracking)
 - Hydration completion (plan before execute)
-- Critic review (second opinion)
 
 | Operation Type             | Tool                           | Requires TASK GATE         | Bypass               |
 | -------------------------- | ------------------------------ | -------------------------- | -------------------- |
@@ -335,11 +331,16 @@ The TASK GATE tracks three conditions for full compliance:
 | -------------------- | ------------------------------- | --------------------------------------------------------- | ------------------------- |
 | (a) Task bound       | Session has active task         | `update_task(status="in_progress")` or `create_task(...)` | `main_agent.current_task` |
 | (b) Hydrator invoked | Plan mode or hydrator completed | `EnterPlanMode` tool or prompt-hydrator SubagentStop      | `state.plan_mode_invoked` |
-| (c) Critic invoked   | Critic agent reviewed plan      | SubagentStop with `subagent_type="critic"`                | `state.critic_invoked`    |
 
-**Default enforcement**: Only gate (a) task_bound is enforced. Gates (b) and (c) are tracked for observability.
+**Default enforcement**: Only gate (a) task_bound is enforced. Gate (b) is tracked for observability.
 
-**Full enforcement**: Set `TASK_GATE_ENFORCE_ALL=1` to require all three gates.
+**Full enforcement**: Set `TASK_GATE_ENFORCE_ALL=1` to require both gates.
+
+**Hydration enforcement mode**: `warn` (default). The hydration gate is advisory; agents receive guidance but are not blocked. Override via `HYDRATION_GATE_MODE=block` env var.
+
+Warn is the appropriate default per P#105 (Standard Tooling Over Framework Gates): hydration is workflow guidance, not an integrity constraint. Hard-blocking is reserved for correctness gates (custodiet, QA). The advisory notice is surfaced on every non-exempt tool call until hydration is satisfied — this is not a silent failure (P#8 Fail-Fast): the agent is explicitly informed on each tool call and proceeding without hydration is a deliberate, visible choice.
+
+Read-only tools (`read_only` category) are excluded from the gate policy. Blocking reads before hydration creates a circular dependency: the agent cannot gather the context needed to run the hydrator if reads are blocked. Read-only operations carry no side effects that require a hydrated execution plan.
 
 **Binding flow**:
 
@@ -347,8 +348,7 @@ The TASK GATE tracks three conditions for full compliance:
 2. Agent calls `update_task(status="in_progress")` or `create_task(...)` → gate (a) set
 3. `task_binding.py` PostToolUse hook sets `current_task` in session state
 4. Agent enters plan mode or hydrator completes → gate (b) set
-5. Agent invokes critic: `Task(subagent_type="aops-core:critic", ...)` → gate (c) set
-6. `check_task_required_gate()` checks gates before allowing destructive operations
+5. `check_task_required_gate()` checks gates before allowing destructive operations
 
 **Bypass conditions**:
 
@@ -371,21 +371,18 @@ The TASK GATE tracks three conditions for full compliance:
 
 Session end is blocked until requirements are met. Three-phase validation ensures proper handover.
 
-### Framework Reflection Validation (Three-Stage)
+### Framework Reflection Validation (Two-Stage)
 
 **Enforcement**: `gate_registry.py` (AfterAgent → `check_agent_response_listener`) + `check_stop_gate`.
 
-The stop gate requires THREE conditions for session completion:
+The stop gate requires TWO conditions for session completion:
 
 | Condition                | Gate                     | Set By                                       | Check                       |
 | ------------------------ | ------------------------ | -------------------------------------------- | --------------------------- |
 | (1) Hydration invoked    | `hydrator_invoked`       | `post_hydration_trigger` (PostToolUse)       | Prompt-hydrator completed   |
 | (2) Reflection validated | `handover_skill_invoked` | `check_agent_response_listener` (AfterAgent) | All required fields present |
-| (3) QA verified          | `qa_invoked`             | `post_qa_trigger` (PostToolUse)              | QA skill/task invoked       |
 
-**Note**: Condition (3) is only required when hydration occurred AND workflow is not streamlined (`interactive-followup`, `simple-question`, `direct-skill`).
-
-**QA enforcement mode**: `block` (default). QA failures halt the session. Override via `QA_GATE_MODE=warn` env var. Changed from `warn` to `block` on 2026-02-14 after QA rubber-stamped a source substitution violation (see `$ACA_DATA/aops/fails/20260214-scope-drift-url-pivot.md`).
+**Note**: Condition (2) is only required when hydration occurred AND workflow is not streamlined (`interactive-followup`, `simple-question`, `direct-skill`).
 
 **Gate (2) Field Validation**: When `## Framework Reflection` is detected in agent response, all 8 required fields must be present:
 
@@ -416,7 +413,7 @@ The stop gate requires THREE conditions for session completion:
 3. PostToolUse hook sets `qa_invoked` flag
 4. Agent outputs Framework Reflection with ALL required fields
 5. AfterAgent hook validates format and sets `handover_skill_invoked` flag
-6. Agent invokes `/handover` skill
+6. Agent invokes `/dump` command
 7. Agent attempts to end session (triggers Stop event)
 8. Stop gate checks all three flags (hydrator, handover, QA)
 9. If all flags set: session ends
@@ -463,7 +460,6 @@ Main agent has all tools except deny rules. Subagents are restricted:
 | Main agent        | All (minus deny rules)                         | varies | Primary task execution                                                                                         |
 | prompt-hydrator   | Read, Grep, mcp__memory__retrieve_memory, Task | haiku  | Context enrichment (Edit/Write blocked by check_subagent_tool_restrictions)                                    |
 | custodiet         | Read                                           | haiku  | Compliance checking                                                                                            |
-| critic            | Read                                           | opus   | Plan/conclusion review                                                                                         |
 | qa                | Read, Grep, Glob                               | opus   | Independent verification (anti-sycophancy: must verify against original request verbatim, not agent reframing) |
 | planner           | All (inherits from main)                       | sonnet | Implementation planning                                                                                        |
 | effectual-planner | All (inherits from main)                       | opus   | Strategic planning                                                                                             |
@@ -520,8 +516,8 @@ Context injected via CORE.md at SessionStart. Guides where agents place files.
 | Deny rules       | `$AOPS/config/claude/settings.json` → `permissions.deny`                                                                              |
 | Agent tools      | `$AOPS/aops-core/agents/*.md` → `tools:` frontmatter                                                                                  |
 | PreToolUse       | `$AOPS/aops-core/hooks/gate_registry.py` (hydration, custodiet, subagent_restrictions), `task_required_gate.py`, `policy_enforcer.py` |
-| PostToolUse      | `$AOPS/aops-core/hooks/gate_registry.py` (accountant, task_binding, post_hydration, post_critic, skill_activation)                    |
-| SubagentStop     | `$AOPS/aops-core/hooks/unified_logger.py` (sets `critic_invoked` flag)                                                                |
+| PostToolUse      | `$AOPS/aops-core/hooks/gate_registry.py` (accountant, task_binding, post_hydration, skill_activation)                                 |
+| SubagentStop     | `$AOPS/aops-core/hooks/unified_logger.py`                                                                                            |
 | UserPromptSubmit | `$AOPS/aops-core/hooks/user_prompt_submit.py`                                                                                         |
 | SessionStart     | `$AOPS/aops-core/hooks/sessionstart_load_axioms.py`                                                                                   |
 | Stop             | `$AOPS/aops-core/hooks/reflection_check.py`, `session_end_commit_check.py`                                                            |
@@ -530,4 +526,4 @@ Context injected via CORE.md at SessionStart. Guides where agents place files.
 | Remember skill   | `$AOPS/aops-core/skills/remember/SKILL.md`                                                                                            |
 | Memory sync      | `$AOPS/aops-core/skills/remember/workflows/sync.md`                                                                                   |
 | Session insights | `$AOPS/aops-core/skills/session-insights/SKILL.md`                                                                                    |
-| Session state    | `$AOPS/aops-core/lib/session_state.py` (gate flags: critic_invoked, todo_with_handover)                                               |
+| Session state    | `$AOPS/aops-core/lib/session_state.py` (gate flags: todo_with_handover)                                               |
