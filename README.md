@@ -1,377 +1,162 @@
-# academicOps: A constitutional automation framework for academic work
+# academicOps
 
-academicOps operates through four mechanisms:
+A constitutional framework for governing autonomous AI agents with:
 
-1. **Synchronous workflow enforcement** (local, real-time) — Hooks, hydrator, and custodiet define and enforce universal + modular workflows, ensuring agents use the skills we provide and follow the procedures we define in real time.
+1. **_Ultra vires_ detection** ensures that agents operate within zones of autonomy bounded by their grant of authority -- using public law theory to identify when discretionary choices become invalid.
 
-2. **Asynchronous quality assurance** (GitHub as automation hub) — PR pipelines run strategic review, custodiet compliance, and QA verification after work is submitted. Polecat workers execute tasks autonomously via GitHub Issues.
+2. **A constitutional hierarchy of norms** (axioms → heuristics → enforcement rules) requires every operational rule to derive from a first principle, preventing governance bloat through the same derivation logic that constrains delegated legislation.
 
-3. **Baseline capabilities** — Task system (hierarchical graph with dependencies), memory server (semantic search, cross-session persistence), knowledge architecture (three-repo model with strict separation of user data).
+3. **Commons-based peer review** applies the **bazaar** model of F/OSS peer production to AI governance. Instead of ex-ante rules, we encourage experimentation and collaborative work. Agents review each other's work through structured PR pipelines, the way open source maintainers govern contributions from autonomous participants at scale.
 
-4. **Domain-specific academic tools** — Citation management, research data analysis, document conversion/PDF, email triage, writing style enforcement.
+4. **Doctrinal development** through structured session reflections means recurring friction gets named, codified, and promoted or demoted based on evidence -- the rule system grows incrementally, the way case law does.
 
-### Foundations
+5. **Domain-specific academic tools** -- citation management (Zotero), research data analysis (dbt, Streamlit), document conversion, email triage, writing style enforcement.
 
-- Constitutional: every rule derivable from AXIOMS.md via HEURISTICS.md, supported by evidence
-- Human-readable markdown files are the single sources of truth; everything in git for durability and observability
-- Agents follow a categorical imperative: every action must be supported by a general rule
-- Optimised for long-term strategic planning under conditions of uncertainty
+## The distributed review pipeline
+
+```mermaid
+flowchart LR
+    PR([PR opened / updated]) --> CQ
+
+    subgraph CQ [Code Quality]
+        Lint[Ruff lint + format]
+        Gate[[Gatekeeper agent]]
+        Types[Type check]
+        Lint --> Types
+    end
+
+    subgraph Review [Sequential Review Pipeline]
+        direction TB
+        Cust[[Custodiet:<br/>scope compliance]]
+        Cust --> QA[[QA: acceptance<br/>criteria check]]
+        QA --> MP[[Merge Prep:<br/>auto-fix comments]]
+    end
+
+    subgraph Async [Advisory Review]
+        HydRev[[Hydrator reviewer]]
+        CustRev[[Custodiet reviewer]]
+    end
+
+    CQ -- all pass --> Review
+    PR -.-> Async
+
+    Review --> Notify([Ready for Review])
+    Notify --> Human([Human reviews])
+
+    Human -- LGTM --> AutoMerge([Auto-merge<br/>rebase])
+    AutoMerge -- conflicts --> Claude[[Claude resolves<br/>conflicts + pushes]]
+    AutoMerge -- clean --> Done([Merged])
+    Claude --> Done
+
+    classDef agent fill:#6a1b9a,stroke:#4a148c,stroke-width:2px,color:#fff
+    classDef gate fill:#c62828,stroke:#b71c1c,stroke-width:2px,color:#fff
+    classDef action fill:#0277bd,stroke:#01579b,stroke-width:2px,color:#fff
+    classDef human fill:#ef6c00,stroke:#e65100,stroke-width:2px,color:#fff
+    classDef success fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff
+
+    class Gate,Cust,QA,MP,HydRev,CustRev,Claude agent
+    class Lint,Types action
+    class Human human
+    class Done success
+
+    style CQ fill:none,stroke:#888,stroke-dasharray: 5 5
+    style Review fill:none,stroke:#888,stroke-dasharray: 5 5
+    style Async fill:none,stroke:#888,stroke-dasharray: 5 5
+```
+
+- **By the time the human sees the PR, everything should be clean.** Gatekeeper approves alignment (Approval #1), then custodiet, QA, and merge-prep run sequentially. Merge-prep auto-fixes review comments and pushes corrections.
+- Only humans can trigger merges. "LGTM" means **merge now** — it lodges Approval #2 and enables auto-merge (rebase). If merge conflicts exist, `@claude` is invoked to rebase and resolve them.
+- Hydrator and custodiet reviewers post non-blocking advisory comments on PR creation.
+- Full process documentation: [`specs/pr-process.md`](specs/pr-process.md).
+
+## Local session lifecycle
+
+Every mutating operation passes through gates: active task (work tracking), hydrated execution plan (intent verification), periodic compliance audits (drift detection). Sessions end with structured reflection.
+
+## Hierarchy of norms
+
+| Level | Document | Role | Analogy |
+| ----- | -------- | ---- | ------- |
+| 1 | **AXIOMS.md** | Inviolable principles (30+) | Constitutional provisions |
+| 2 | **HEURISTICS.md** | Evidence-based working rules (40+) | Common law doctrine |
+| 3 | **enforcement-map.md** | Rule-to-mechanism mapping | Regulatory implementation |
+
+Axioms are inviolable: "Fail-Fast" means no defaults, no silent failures; "Research Data Is Immutable" means source datasets are sacred. Heuristics are working hypotheses that evolve through use — "Subagent Verdicts Are Binding" emerged after an agent ignored a compliance finding and introduced scope drift. New rules must derive from existing axioms; if they can't, either the rule is wrong or the axiom set is incomplete.
+
+## Graduated enforcement
+
+| Level | Mechanism | Example |
+| ----- | --------- | ------- |
+| **Hard gate** | Blocks action | Task binding for destructive ops |
+| **Soft gate** | Injects guidance | Hydrator suggests workflows |
+| **Periodic audit** | Every ~15 ops | Custodiet detects drift |
+| **Pre-commit** | Blocks commits | Orphan files, frontmatter validation |
+| **Prompt-level** | JIT injection | Relevant principles surfaced in context |
+
+## Feedback loop
+
+The framework treats itself as a hypothesis under continuous test. Every session generates structured reflections and compliance data. Recurring friction gets named as doctrine. The `/learn` skill captures failures as structured knowledge, with fixes applied at the lowest effective level.
+
+## Memory architecture
+
+| Type | Storage | Example |
+| ---- | ------- | ------- |
+| **Semantic** | `$ACA_DATA` markdown | Timeless knowledge |
+| **Episodic** | Task graph + git issues | Session observations |
+
+`$ACA_DATA` is a current state machine. Human-readable markdown in git, with a memory server providing semantic search over vector embeddings.
+
+## Agent architecture
+
+| Agent | Role |
+| ----- | ---- |
+| **prompt-hydrator** | Enriches prompts with context, selects workflows, applies guardrails |
+| **custodiet** | Live compliance audits — drift, violations, scope creep |
+| **critic** | Reviews execution plans for errors and hidden assumptions |
+| **qa** | Independent verification against acceptance criteria |
+| **effectual-planner** | Strategic planning under genuine uncertainty |
+
+## Skills and commands
+
+24 skills, 7 commands. Skills are fungible. Key examples:
+
+| | |
+| --- | --- |
+| `/analyst` | Research data analysis (dbt, Streamlit, stats) |
+| `/strategy` | Strategic thinking under uncertainty |
+| `/swarm-supervisor` | Parallel worker orchestration with isolated worktrees |
+| `/hdr` | Higher degree research supervision workflows |
+| `/remember` | Dual-write to markdown + memory server |
+| `/learn` | Capture failures as structured knowledge |
+| `/pull` `/q` `/dump` | Task queue lifecycle |
 
 ## Installation
 
-### Link your data repository / knowledge base
-
-- **Environment variables** in `~/.bashrc` or `~/.zshrc`:
-
-```bash
-export ACA_DATA="$HOME/writing/data"     # Your data (NOT in git)
-```
-
-### Install plugin for Claude Code & Gemini CLI
-
 Distribution repository: https://github.com/nicsuzor/aops-dist
 
-Claude Code
+Set the data directory environment variable in `~/.bashrc` or `~/.zshrc`:
+
+```bash
+export ACA_DATA="$HOME/brain"     # Your knowledge base (NOT in this repo)
+```
+
+Claude Code:
 
 ```bash
 command claude plugin marketplace add nicsuzor/aops-dist
 command claude plugin marketplace update aops && command claude plugin install aops-core@aops && command claude plugin list
 ```
 
-Gemini CLI (warning: auto accept flag below, remove --consent if you're concerned)
+Gemini CLI:
 
 ```bash
-(command gemini extensions uninstall aops-core || echo Gemini plugin not installed -- not removing.) && command gemini extensions install git@github.com:nicsuzor/aops-dist.git --consent --auto-update --pre-release
+(command gemini extensions uninstall aops-core || echo not installed) && command gemini extensions install git@github.com:nicsuzor/aops-dist.git --consent --auto-update --pre-release
 ```
 
-## Core Loop
+## Project configuration
 
-**For detailed specification, see**: [[specs/flow.md]]
+Projects customise the framework by adding files to a `.agent/` directory:
 
-**Goal**: The minimal viable framework with ONE complete, working loop.
-
-**Philosophy**: Users don't have to use aops. But if they do, it's slow and thorough. The full workflow is MANDATORY.
-
-### Core Loop Diagram
-
-```mermaid
-flowchart TD
-    %% Node Definitions
-    Start([Session Start])
-
-    subgraph Initialization [1. Initialization]
-        SStart[SessionStart Event] --> Router1{Universal Router}
-        Router1 -.-> Setup[session_env_setup.py]
-        Router1 -.-> StartGate[session_start gate]
-        StartGate --> State[(Create State File)]
-        StartGate --- InitExpl[Loads environment paths,<br/>AXIOMS, and HEURISTICS]
-    end
-
-    subgraph Hydration [2. Hydration & Review]
-        UPS[UserPromptSubmit Event] --> Router2{Universal Router}
-        Router2 -.-> SkipCheck{Skip Hydration?}
-        SkipCheck -- No --> Context[Context -> Temp File]
-        Context --> Hydrator[[prompt-hydrator Subagent]]
-        Hydrator --> Plan[/Hydration Plan/]
-        Hydrator --> GateCr[Critic Gate: CLOSED]
-
-        Hydrator --- HydrateExpl[Fetches: Task queue, memory server,<br/>WORKFLOWS index, and relevant files]
-
-        Plan --> Critic[[critic Subagent]]
-        Critic --> CriticCheck{Plan Approved?}
-        CriticCheck -- REVISE --> Plan
-        CriticCheck -- PROCEED --> OpenCr[Critic Gate: OPEN]
-        Critic --- CriticExpl[Evaluates plan for assumptions,<br/>safety gaps, and logic errors]
-    end
-
-    subgraph Execution [3. Execution & Hard Gates]
-        PreTool[PreToolUse Event] --> Router3{Universal Router}
-
-        Router3 -.-> GateH[Hydration Gate]
-        GateH --> GateT[Task Gate]
-        GateT --> GateCr_Exec[Critic Gate]
-
-        GateH --- HExpl[Blocks mutating tools until<br/>an execution plan is generated]
-        GateT --- TExpl[Enforces work tracking by requiring<br/>an active task for destructive actions]
-        GateCr_Exec --- CrExpl[Blocks edit tools until plan is reviewed]
-
-        GateCr_Exec --> ThresholdCheck{Audit Threshold?}
-        ThresholdCheck -- Yes ~15 ops --> GateC[Custodiet Gate]
-        ThresholdCheck -- No --> Tool[[Execute Tool]]
-
-        GateC --- CExpl[Reviews session history for<br/>principle violations and scope drift]
-        GateC --> Tool
-
-        Tool --> PostTool[PostToolUse Event]
-        PostTool --> Router4{Universal Router}
-        Router4 -.-> Accountant[Accountant: Update Counters]
-    end
-
-    subgraph Termination [4. Reflection & Close]
-        AfterAgent[AfterAgent Event] --> Router5{Universal Router}
-        Router5 -.-> GateHa[Handover Gate]
-        GateHa --- HaExpl[Ensures Framework Reflection includes<br/>all 8 required metadata fields]
-
-        GateHa --> Stop[Stop Event]
-        Stop --> Router6{Universal Router}
-        Router6 -.-> Commit[Commit & Close]
-
-        Commit --- QExpl[Mandates independent<br/>QA passage and clean git state]
-    end
-
-    %% Flow Connections
-    Start --> SStart
-    State --> UPS
-    SkipCheck -- Yes --> PreTool
-    OpenCr --> PreTool
-    Accountant --> AfterAgent
-    Commit --> End([Session End])
-
-    %% Styling (Light & Dark Theme Compatible)
-    classDef hook fill:#0277bd,stroke:#01579b,stroke-width:2px,color:#fff
-    classDef gate fill:#c62828,stroke:#b71c1c,stroke-width:2px,color:#fff
-    classDef agent fill:#6a1b9a,stroke:#4a148c,stroke-width:2px,color:#fff
-    classDef state fill:#ef6c00,stroke:#e65100,stroke-width:2px,color:#fff
-    classDef event fill:#424242,stroke:#212121,stroke-width:2px,color:#fff
-    classDef explain fill:none,stroke:#888,stroke-width:1px,color:#888,font-style:italic
-
-    class Router1,Router2,Router3,Router4,Router5,Router6,Setup,Accountant,Commit hook
-    class StartGate,SkipCheck,GateH,GateT,GateC,GateCr,OpenCr,GateCr_Exec,GateHa,ThresholdCheck gate
-    class Hydrator,Critic agent
-    class State,Plan,Context state
-    class SStart,UPS,PreTool,PostTool,AfterAgent,Stop event
-    class InitExpl,HydrateExpl,CriticExpl,HExpl,TExpl,CrExpl,CExpl,HaExpl,QExpl explain
-
-    %% Subgraph Styling
-    style Initialization fill:none,stroke:#888,stroke-dasharray: 5 5
-    style Hydration fill:none,stroke:#888,stroke-dasharray: 5 5
-    style Execution fill:none,stroke:#888,stroke-dasharray: 5 5
-    style Termination fill:none,stroke:#888,stroke-dasharray: 5 5
-```
-
-## Core Concepts
-
-### The Logical Derivation System
-
-academicOps is built as a **validated logical system**. Every rule traces back to first principles:
-
-| Level | Document                                | Contains                    | Status                           |
-| ----- | --------------------------------------- | --------------------------- | -------------------------------- |
-| 1     | **aops-core/AXIOMS.md**                 | Inviolable principles       | Cannot be violated               |
-| 2     | **aops-core/HEURISTICS.md**             | Empirically validated rules | Can be revised with evidence     |
-| 3     | **aops-core/framework/enforcement-map.md** | Enforcement mechanisms      | Maps rules to technical controls |
-
-**The derivation rule**: Every convention MUST trace to an axiom. If it can't be derived, the convention is invalid.
-
-### Axioms vs Heuristics
-
-**Axioms** are inviolable—they define what the system IS:
-
-- "Fail-Fast": No defaults, no fallbacks, no silent failures
-- "Skills Are Read-Only": No dynamic data in skills
-- "Research Data Is Immutable": Never modify source datasets
-
-**Heuristics** are working hypotheses validated by evidence:
-
-- "Semantic Link Density": Related files MUST link to each other
-- "Skills Contain No Dynamic Content": Current state lives in $ACA_DATA
-
-The difference: axioms cannot be violated; heuristics can and _should be_ be revised when evidence shows they're wrong.
-
-### Skills vs Workflows
-
-The framework distinguishes between **what** to do and **how** to do it:
-
-|              | Skills                           | Workflows                      |
-| ------------ | -------------------------------- | ------------------------------ |
-| **Answer**   | "How do I do X?"                 | "What should I do?"            |
-| **Nature**   | Fungible instructions            | Composable chains of steps     |
-| **Examples** | Create a PDF, generate a mindmap | Feature development, TDD cycle |
-
-**Skills** are interchangeable recipes—any skill that creates a PDF can substitute for another. They're the building blocks.
-
-**Workflows** orchestrate those building blocks into coherent processes. A workflow defines the sequence (spec review → implementation → QA), while skills handle each step's mechanics.
-
-For full specification, see [[specs/workflow-system-spec.md]].
-
-### Enforcement Levels
-
-Rules aren't just documented—they're enforced at multiple levels:
-
-| Level          | Mechanism                                  | Example                                   |
-| -------------- | ------------------------------------------ | ----------------------------------------- |
-| **Hard Gate**  | Blocks action entirely                     | PreToolUse hooks block `git reset --hard` |
-| **Soft Gate**  | Injects guidance, agent can proceed        | prompt-hydrator suggests skills           |
-| **Prompt**     | Instructional (AXIOMS.md at session start) | "Verify First" reminder                   |
-| **Detection**  | Logs for analysis                          | custodiet compliance checks               |
-| **Pre-commit** | Blocks commits                             | Orphan file detection                     |
-
-### The Self-Reflexive Framework Agent
-
-This framework treats itself as a hypothesis. Agents are **co-developers**, not just executors:
-
-```
-When you encounter friction—something that doesn't fit, a question
-the schema can't answer, a pattern that needs a name—do this:
-
-1. Log it.
-2. Propose an amendment if you see one.
-3. Don't force it. If something doesn't fit, that's data.
-```
-
-The framework **evolves through use**. When agents hit friction:
-
-- Violations are logged as bd issues (operational observations)
-- Patterns that emerge get named and proposed as new heuristics
-- Heuristics that prove themselves get promoted or consolidated
-- Rules that don't work get revised
-
-This creates a feedback loop: the framework improves based on real usage, not theoretical design.
-
-### How the Framework Improves Itself
-
-The self-improvement cycle has three phases:
-
-**1. Observe** - Every session generates observables:
-
-- **Framework Reflections**: Agent self-reports at session end (outcome, friction, proposals)
-- **Token metrics**: Usage by model, agent, and tool (cache efficiency, throughput)
-- **Skill compliance**: Which suggested skills were actually invoked
-- **Learning observations**: Mistakes and corrections with root cause categories
-
-See [[specs/framework-observability.md]] for details
-
-**2. Analyze** - Humans identify patterns:
-
-- Recurring friction points → systemic problems
-- Low skill compliance → discovery or routing issues
-- Token inefficiency → optimize hydration or caching
-
-**3. Intervene** - Capture and apply fixes via `/learn`:
-
-- Use `/learn` for rapid async knowledge capture of failures (dump to GitHub issues)
-- Apply minimal fixes documented as single tasks
-- Avoid complex task trees; prefer "fire and forget" capture
-
-See [[specs/feedback-loops.md]] for the complete improvement workflow.
-
-### Memory Architecture
-
-The framework distinguishes between two types of knowledge:
-
-| Type         | Storage            | Example                                               |
-| ------------ | ------------------ | ----------------------------------------------------- |
-| **Episodic** | task+git issues    | "I tried X and it failed" (time-stamped observations) |
-| **Semantic** | $ACA_DATA markdown | "X doesn't work because Y" (timeless truths)          |
-
-$ACA_DATA is a **current state machine**—always up to date, always perfect. The memory server (accessed via `mcp__memory__retrieve_memory`) is a semantic search index derived from this markdown.
-
-## Architecture
-
-### Core Components
-
-| Category    | Components                                                                                                                                                                 |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Skills (24) | remember, analyst, audit, session-insights, garden, hypervisor, task-viz, etc.                                                                                             |
-| Agents (4)  | prompt-hydrator, critic, custodiet, effectual-planner                                                                                                                      |
-| Hooks (18)  | router.py (Universal Hook Router), unified_logger.py, user_prompt_submit.py, session_env_setup.py, gate system (hydration, task, critic, custodiet, handover)              |
-| Governance  | 30+ axioms and heuristics with mechanical and instructional enforcement                                                                                                    |
-
-### Key Agents
-
-| Agent               | Model | Role                                                                    |
-| ------------------- | ----- | ----------------------------------------------------------------------- |
-| **framework**       | opus  | Primary entry point for framework changes. Handles full task lifecycle. |
-| **prompt-hydrator** | haiku | Enriches prompts with context, suggests workflows, applies guardrails   |
-| **critic**          | opus  | Reviews plans for errors and hidden assumptions before execution        |
-| **custodiet**       | haiku | Periodic compliance audits (every 15 tool calls). Detects drift.        |
-
-The **framework agent** embodies the self-reflexive principle—it both executes framework tasks AND proposes improvements to the framework itself.
-
-## Commands
-
-| Command          | Purpose                                                |
-| ---------------- | ------------------------------------------------------ |
-| /aops            | Show framework capabilities and help                   |
-| /diag            | Quick diagnostic of what's loaded in session           |
-| /pull            | Pull a task from the queue and claim it                |
-| /q               | Quick-queue a task for later                           |
-| /learn           | Rapid async knowledge capture for framework failures |
-| /work            | Collaborative task execution                           |
-| /log             | Log framework observations for continuous improvement  |
-| /dump            | Session handover and context dump                      |
-| /bump            | Increment framework version                            |
-
-## Key Skills
-
-| Skill             | Purpose                                               |
-| ----------------- | ----------------------------------------------------- |
-| /analyst          | Academic research data analysis (dbt, Streamlit)      |
-| /audit            | Comprehensive framework governance audit              |
-| /daily            | Daily note lifecycle, morning briefing, and sync      |
-| /remember         | Persist knowledge to markdown and memory server       |
-| /session-insights | Generate structured insights from session transcripts |
-| /task-viz         | Generate network graph of tasks and notes             |
-| /convert-to-md    | Batch convert documents to markdown                   |
-| /pdf              | Generate professionally formatted academic PDFs       |
-| /hypervisor       | Parallel batch task processing                        |
-| /excalidraw       | Create hand-drawn style diagrams and mind maps        |
-
-## Project Configuration
-
-Projects can customize the hydrator's behavior by adding files to a `.agent/` directory in the project root.
-
-### `.agent/context-map.json`
-
-Maps project documentation to topics for just-in-time context injection. The hydrator presents this index to agents, who decide which files to read based on relevance.
-
-```json
-{
-  "docs": [
-    {
-      "topic": "authentication",
-      "path": "docs/auth-flow.md",
-      "description": "OAuth2 implementation with JWT tokens",
-      "keywords": ["oauth", "jwt", "login", "session", "token"]
-    },
-    {
-      "topic": "database_schema",
-      "path": "docs/schema.md",
-      "description": "PostgreSQL table definitions and migrations",
-      "keywords": ["postgres", "tables", "migrations", "sql"]
-    },
-    {
-      "topic": "api_endpoints",
-      "path": "docs/api.md",
-      "description": "REST API reference",
-      "keywords": ["api", "rest", "endpoints", "http"]
-    }
-  ]
-}
-```
-
-**Fields**:
-
-- `topic`: Short identifier for the documentation area
-- `path`: Relative path from project root to the documentation file
-- `description`: Brief explanation of what the file covers
-- `keywords`: Terms that trigger relevance (agent makes semantic decision, not keyword matching)
-
-### `.agent/rules/`
-
-Project-specific rules that apply to ALL work in the project. Files in this directory are pre-loaded into the hydrator context and presented as binding constraints.
-
-```
-project/
-├── .agent/
-│   ├── rules/
-│   │   ├── testing.md      # "All PRs require 80% coverage"
-│   │   ├── code-style.md   # "Use ruff, not black"
-│   │   └── architecture.md # "No direct DB access from handlers"
-```
-
-Rules are loaded automatically—agents don't need to search for them.
-
-### `.agent/workflows/`
-
-Project-specific workflows that supplement the global workflow index. Use for project-specific processes (e.g., release procedures, review checklists).
+- **`.agent/rules/`** - Project-specific rules loaded automatically as binding constraints
+- **`.agent/workflows/`** - Project-specific workflows supplementing the global index
+- **`.agent/context-map.json`** - Maps project documentation to topics for just-in-time context injection

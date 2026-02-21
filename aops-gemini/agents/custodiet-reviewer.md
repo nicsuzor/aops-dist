@@ -6,6 +6,10 @@ model: gemini-3-flash-preview
 tools:
 - run_shell_command
 - read_file
+- glob
+- search_file_content
+- run_shell_command
+- read_file
 - task_manager__search_tasks
 - task_manager__get_task
 - memory__retrieve_memory

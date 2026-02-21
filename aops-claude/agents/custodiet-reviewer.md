@@ -4,7 +4,8 @@ description: "Async compliance reviewer for PRs and issues \u2014 detects scope 
   \ and framework principle violations"
 model: haiku
 color: red
-tools: Bash, Read, mcp__task_manager__search_tasks, mcp__task_manager__get_task, mcp__memory__retrieve_memory
+tools: Bash, Read, Glob, Grep, Bash, Read, mcp__task_manager__search_tasks, mcp__task_manager__get_task,
+  mcp__memory__retrieve_memory
 ---
 
 # Custodiet Reviewer Agent

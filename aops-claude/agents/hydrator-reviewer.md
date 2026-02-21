@@ -4,7 +4,8 @@ description: "Async workflow guidance reviewer for PRs and issues \u2014 identif
   \ applicable workflows and quality gates"
 model: haiku
 color: cyan
-tools: Bash, mcp__task_manager__search_tasks, mcp__task_manager__get_task, mcp__memory__retrieve_memory
+tools: Bash, Read, Glob, Grep, Bash, mcp__task_manager__search_tasks, mcp__task_manager__get_task,
+  mcp__memory__retrieve_memory
 ---
 
 # Hydrator Reviewer Agent
