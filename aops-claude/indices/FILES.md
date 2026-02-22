@@ -113,7 +113,6 @@ lib/transcript_error_analyzer.py
 lib/transcript_parser.py
 mcp_servers/__init__.py
 mcp_servers/memory_proxy.py
-mcp_servers/tasks_server.py
 plugin.json
 pyproject.toml
 scripts/audit_framework_health.py
@@ -293,6 +292,7 @@ workflows/base-tdd.md
 workflows/base-verification.md
 workflows/constraint-check.md
 workflows/decompose.md
+workflows/dogfooding.md
 workflows/email-capture.md
 workflows/email-reply.md
 workflows/email-triage.md

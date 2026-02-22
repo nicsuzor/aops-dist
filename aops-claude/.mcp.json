@@ -18,21 +18,12 @@
         "MEMORY_SERVER_URL": "http://services.stoat-musical.ts.net:8026/mcp"
       }
     },
-    "task_manager": {
+    "pkb": {
       "type": "stdio",
-      "command": "env",
-      "args": [
-        "-u",
-        "VIRTUAL_ENV",
-        "uv",
-        "run",
-        "--directory",
-        "${CLAUDE_PLUGIN_ROOT}",
-        "python",
-        "mcp_servers/tasks_server.py"
-      ],
+      "command": "${CLAUDE_PLUGIN_ROOT}/bin/pkb-search",
       "env": {
-        "ACA_DATA": "${ACA_DATA}"
+        "ACA_DATA": "${ACA_DATA}",
+        "RUST_LOG": "warn"
       }
     }
   }

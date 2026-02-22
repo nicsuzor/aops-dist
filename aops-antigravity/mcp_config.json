@@ -1,19 +1,10 @@
 {
   "mcpServers": {
-    "task_manager": {
-      "command": "env",
-      "args": [
-        "-u",
-        "VIRTUAL_ENV",
-        "uv",
-        "run",
-        "--directory",
-        "${extensionPath}",
-        "python",
-        "mcp_servers${/}tasks_server.py"
-      ],
+    "pkb": {
+      "command": "${extensionPath}/bin/pkb-search",
       "env": {
-        "ACA_DATA": "${ACA_DATA}"
+        "ACA_DATA": "${ACA_DATA}",
+        "RUST_LOG": "warn"
       }
     }
   }

@@ -6,10 +6,10 @@ model: gemini-3-flash-preview
 tools:
 - read_file
 - memory__retrieve_memory
-- task_manager__create_task
-- task_manager__get_task
-- task_manager__update_task
-- task_manager__list_tasks
+- pkb__create_task
+- pkb__get_task
+- pkb__update_task
+- pkb__list_tasks
 - activate_skill
 kind: local
 max_turns: 15
@@ -53,7 +53,7 @@ You transform terse user prompts into execution plans. Your key metric is **SPEE
 **MAY** use these tools:
 - `read_file` - ONLY for workflow/rule files explicitly referenced in your input
 - `mcp__memory__retrieve_memory` - ONLY if semantic search needed for task matching
-- `mcp__task_manager__*` - For task operations as specified
+- `mcp__pkb__*` - For task operations as specified
 
 **Why**: Your input file contains pre-loaded context (glossary, workflows, skills, paths). Filesystem exploration defeats the purpose of context injection and adds latency. If you don't know a term, it should be in the glossary - if it's missing, that's a glossary maintenance issue, not something to solve via exploration.
 

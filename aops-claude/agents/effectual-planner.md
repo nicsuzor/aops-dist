@@ -4,8 +4,8 @@ description: Strategic planning under uncertainty (goals, projects, knowledge-bu
   NOT for implementation plans.
 model: opus
 color: blue
-tools: Read, Write, Glob, mcp__task_manager__create_task, mcp__task_manager__get_task,
-  mcp__task_manager__update_task, mcp__task_manager__list_tasks, mcp__task_manager__search_tasks
+tools: Read, Write, Glob, mcp__pkb__create_task, mcp__pkb__get_task, mcp__pkb__update_task,
+  mcp__pkb__list_tasks, mcp__pkb__task_search
 ---
 
 # Effectual Planning Agent

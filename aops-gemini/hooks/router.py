@@ -522,9 +522,9 @@ class HookRouter:
                 notify_session_stop(config, ctx.session_id, current_task)
             elif ctx.hook_event == "PostToolUse":
                 TASK_BINDING_TOOLS = {
-                    "mcp__plugin_aops-core_task_manager__update_task",
-                    "mcp__plugin_aops-core_task_manager__complete_task",
-                    "mcp__plugin_aops-core_task_manager__complete_tasks",
+                    "mcp__pkb__update_task",
+                    "mcp__pkb__complete_task",
+                    "mcp__pkb__complete_tasks",
                     "update_task",
                     "complete_task",
                     "complete_tasks",
@@ -568,9 +568,7 @@ class HookRouter:
             from pathlib import Path
 
             root_dir = Path(__file__).parent.parent
-            script_path = root_dir / "scripts" / "transcript_push.py"
-            if not script_path.exists():
-                script_path = root_dir / "scripts" / "transcript.py"
+            script_path = root_dir / "scripts" / "transcript.py"
 
             if script_path.exists():
                 subprocess.run(

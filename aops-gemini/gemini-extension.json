@@ -1,6 +1,6 @@
 {
   "name": "aops-core",
-  "version": "0.2.19",
+  "version": "0.2.20",
   "description": "AcademicOps Framework Extension for Gemini CLI - skills, agents, hooks, and tools for research workflow automation",
   "contextFileName": "GEMINI.md",
   "mcpServers": {
@@ -13,20 +13,11 @@
         "MCP_MEMORY_API_KEY": "${MCP_MEMORY_API_KEY}"
       }
     },
-    "task_manager": {
-      "command": "env",
-      "args": [
-        "-u",
-        "VIRTUAL_ENV",
-        "uv",
-        "run",
-        "--directory",
-        "${extensionPath}",
-        "python",
-        "mcp_servers${/}tasks_server.py"
-      ],
+    "pkb": {
+      "command": "${extensionPath}/bin/pkb-search",
       "env": {
-        "ACA_DATA": "${ACA_DATA}"
+        "ACA_DATA": "${ACA_DATA}",
+        "RUST_LOG": "warn"
       }
     }
   }

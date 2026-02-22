@@ -7,11 +7,11 @@ tools:
 - read_file
 - write_file
 - glob
-- task_manager__create_task
-- task_manager__get_task
-- task_manager__update_task
-- task_manager__list_tasks
-- task_manager__search_tasks
+- pkb__create_task
+- pkb__get_task
+- pkb__update_task
+- pkb__list_tasks
+- pkb__task_search
 kind: local
 max_turns: 15
 timeout_mins: 5
