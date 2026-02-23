@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "pkb": {
-      "command": "${extensionPath}/bin/pkb-search",
+      "command": "pkb",
       "env": {
         "ACA_DATA": "${ACA_DATA}",
         "RUST_LOG": "warn"
