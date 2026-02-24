@@ -12,12 +12,13 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 290
+Total files: 291
 
 ## File Tree
 
 ```
 AXIOMS.md
+CONNECTORS.md
 GEMINI.md
 HEURISTICS.md
 INDEX.md
@@ -25,6 +26,7 @@ INSTALLATION.md
 REMINDERS.md
 RULES.md
 SKILLS.md
+TOOLS.md
 WORKFLOWS.md
 agents/butler.md
 agents/custodiet-reviewer.md
@@ -55,7 +57,6 @@ hooks/router.py
 hooks/schemas.py
 hooks/session_end_commit_check.py
 hooks/session_env_setup.py
-hooks/task_binding.py
 hooks/templates/README.md
 hooks/templates/custodiet-audit.md
 hooks/templates/custodiet-context.md
@@ -216,7 +217,6 @@ skills/framework/workflows/03-experiment-design.md
 skills/framework/workflows/04-monitor-prevent-bloat.md
 skills/framework/workflows/05-feature-development.md
 skills/framework/workflows/06-develop-specification.md
-skills/framework/workflows/07-learning-log.md
 skills/framework/workflows/08-decision-briefing.md
 skills/framework/workflows/09-session-hook-forensics.md
 skills/garden/SKILL.md
@@ -257,6 +257,7 @@ skills/python-dev/references/type-safety.md
 skills/qa/SKILL.md
 skills/qa/references/acceptance-testing.md
 skills/qa/references/integration-validation.md
+skills/qa/references/qa-planning.md
 skills/qa/references/qualitative-assessment.md
 skills/qa/references/quick-verification.md
 skills/qa/references/system-design-qa.md

@@ -23,7 +23,6 @@ Route your task to the appropriate workflow:
 | **Check for bloat or trim the framework** | [04-monitor-prevent-bloat](workflows/04-monitor-prevent-bloat.md) |
 | **Build a significant new feature**       | [05-feature-development](workflows/05-feature-development.md)     |
 | **Write or update a specification**       | [06-develop-specification](workflows/06-develop-specification.md) |
-| **Record a lesson or observation**        | [07-learning-log](workflows/07-learning-log.md)                   |
 | **Unstick a blocked decision**            | [08-decision-briefing](workflows/08-decision-briefing.md)         |
 
 ### Quick Decision Tree
@@ -46,9 +45,6 @@ Is this documentation/spec work?
 
 Is this cleanup/maintenance?
   → YES: 04-monitor-prevent-bloat
-
-Is this capturing a learning?
-  → YES: 07-learning-log
 
 Is something stuck waiting for a decision?
   → YES: 08-decision-briefing
@@ -111,7 +107,7 @@ Every task MUST follow this lifecycle. No shortcuts.
 2. LOAD CONTEXT (as needed)
    - Read AXIOMS.md if verifying principles
    - Read VISION.md if checking scope alignment
-   - mcp__memory__retrieve_memory(query="[topic]") for prior work
+   - mcp__pkb__search(query="[topic]") for prior work
 ```
 
 ### Phase 2: Planning (For Non-Trivial Work)

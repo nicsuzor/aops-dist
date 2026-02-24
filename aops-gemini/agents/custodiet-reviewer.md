@@ -12,7 +12,7 @@ tools:
 - read_file
 - pkb__task_search
 - pkb__get_task
-- memory__retrieve_memory
+- pkb__search
 kind: local
 max_turns: 15
 timeout_mins: 5
@@ -36,7 +36,7 @@ You are given a PR number and repository, OR a file path containing PR context. 
 1. Get PR title, description, and full diff using `gh pr view` and `gh pr diff`
 2. Read relevant framework files to verify principle compliance: `aops-core/AXIOMS.md`, `aops-core/HEURISTICS.md`
 3. Search for a related task: `mcp__pkb__task_search` by PR title keywords — the task body may define the original scope and acceptance criteria
-4. Retrieve memory context if the PR touches recurring patterns: `mcp__memory__retrieve_memory`
+4. Retrieve context if the PR touches recurring patterns: `mcp__pkb__search`
 
 ## Step 3: Compliance Checks
 
