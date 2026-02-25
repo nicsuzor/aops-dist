@@ -80,6 +80,8 @@ class TaskIndexEntry:
     due: str | None = None
     tags: list[str] = field(default_factory=list)
     assignee: str | None = None
+    downstream_weight: float = 0.0  # Computed: transitive impact score
+    stakeholder_exposure: bool = False  # Computed: blocked task has due date
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
@@ -103,6 +105,8 @@ class TaskIndexEntry:
             "due": self.due,
             "tags": self.tags,
             "assignee": self.assignee,
+            "downstream_weight": self.downstream_weight,
+            "stakeholder_exposure": self.stakeholder_exposure,
         }
 
     @classmethod
@@ -128,6 +132,8 @@ class TaskIndexEntry:
             due=data.get("due"),
             tags=data.get("tags", []),
             assignee=data.get("assignee"),
+            downstream_weight=data.get("downstream_weight", 0.0),
+            stakeholder_exposure=data.get("stakeholder_exposure", False),
         )
 
     @classmethod
@@ -314,10 +320,12 @@ class TaskIndex:
             ):
                 self._ready.append(task_id)
 
-        # Sort ready by priority
+        # Sort ready by priority ASC, downstream_weight DESC, order, title
+        # Matches Rust fast-indexer sort order
         self._ready.sort(
             key=lambda tid: (
                 self._tasks[tid].priority,
+                -self._tasks[tid].downstream_weight,
                 self._tasks[tid].order,
                 self._tasks[tid].title,
             )
@@ -555,8 +563,8 @@ class TaskIndex:
             if caller == "polecat":
                 entries = [e for e in entries if not (set(e.tags) & self.HUMAN_TAGS)]
 
-        # Sort by priority (lower is higher priority), then order, then title
-        entries.sort(key=lambda e: (e.priority, e.order, e.title))
+        # Sort by priority ASC, downstream_weight DESC, order, title
+        entries.sort(key=lambda e: (e.priority, -e.downstream_weight, e.order, e.title))
         return entries
 
     def get_blocked_tasks(self) -> list[TaskIndexEntry]:
@@ -630,7 +638,7 @@ class TaskIndex:
         ready_ids = set(self._ready)
 
         actions = [e for e in descendants if e.id in ready_ids]
-        actions.sort(key=lambda e: (e.priority, e.order, e.title))
+        actions.sort(key=lambda e: (e.priority, -e.downstream_weight, e.order, e.title))
         return actions
 
     def stats(self) -> dict[str, Any]:
