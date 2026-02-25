@@ -81,57 +81,32 @@ Tasks cluster in visualizations based on their parent chain reaching a canonical
 3. **Tasks link to goals**: Every task has `parent:` pointing up the chain
 4. **Project field matches**: `project: {slug}` matches the project file's `id:`
 
-<<<<<<< HEAD
-=======
-**Structure:**
+## Completion Loop (MANDATORY)
+
+When decomposing work into subtasks, ALWAYS create a **verify-parent** task:
+
+1. Create all subtasks as normal
+2. Create one additional task: `"Verify: [parent goal] fully resolved"`
+3. Set `depends_on:` to ALL the subtasks just created
+4. Set `assignee: null` (requires human judgment)
+5. This task's body should restate the original problem and acceptance criteria
+
+**Purpose**: Subtasks getting completed does not mean the parent's goal was met. The verify-parent task forces a return to the original problem to confirm it's fully solved or to iterate again.
+
+**Example**:
 ```
-{project}.md (type: project)
-├── {goal}.md (type: goal, parent: project-id)
-│   └── {task}.md (type: task, parent: goal-id, project: slug)
+Parent: "Fix task graph quality issues"
+  ├── Subtask 1: "Update priority semantics doc"
+  ├── Subtask 2: "Implement parent requirement rules"
+  ├── Subtask 3: "Design nightly maintenance system"
+  └── Verify: "Confirm task graph quality issues are resolved"
+       depends_on: [subtask-1, subtask-2, subtask-3]
+       body: "Return to the original problem. Are task graph quality
+              issues actually resolved? Check: ..."
 ```
 
-**Diagnosis**: If tasks with `project: X` don't cluster, check whether `X.md` exists with `type: project`. Missing project files are a common cause of orphaned-looking tasks.
+**Relationship to P#71**: P#71 says "complete the parent immediately" when decomposing. The completion loop does not contradict this — the decomposition work IS complete. The verify task is a NEW task that checks whether the original goal was achieved after all implementation is done.
 
-## Priority and Weight Semantics
-
-When assigning priority during decomposition, understand how priority and weight interact:
-
-### Priority (P0-P4): Creator's Urgency Assessment
-
-| Level | Meaning | Use When |
-|-------|---------|----------|
-| **P0** | Critical blocker | Production down, data loss risk |
-| **P1** | Needed this week | Deliverable with an imminent deadline |
-| **P2** | Normal (default) | Standard work, no unusual urgency |
-| **P3** | Low priority | Nice to have, do when bandwidth allows |
-| **P4** | Someday/maybe | Backlog, aspirational |
-
-**Rule: Default to P2. Only use P1 for deliverables needed this week.**
-
-### Weight (computed): Systemic Importance
-
-`downstream_weight` is computed automatically by the fast-indexer via BFS through `blocks` and `soft_blocks` edges. It answers: "What does completing this task unblock?"
-
-- A task blocking 5 other tasks has higher weight than an isolated task
-- Tasks on the critical path to goals with due dates get extra weight via `stakeholder_exposure`
-- Weight is not set by humans — it emerges from the graph structure
-
-### Sort Order
-
-Ready tasks are sorted by: **priority ASC, downstream_weight DESC, order, title**
-
-This means:
-- Among P2 tasks, the one that unblocks the most work comes first
-- A P2 task with high weight sorts after all P1 tasks but before other P2 tasks
-- Priority is the primary sort axis; weight breaks ties within the same priority level
-
-### Common Mistakes
-
-- **Priority inflation**: Setting P1 on everything because it "feels important." If >25% of tasks are P1, priority has lost its meaning.
-- **Ignoring weight**: Manually reordering tasks instead of letting the graph determine systemic importance.
-- **Confusing urgency with importance**: P1 = "needed this week" (urgency), high weight = "unblocks many things" (importance). They are orthogonal.
-
->>>>>>> 4912fc9 (feat: task graph governance reform — hierarchy warnings, weight surfacing, audit script)
 ## Anti-Patterns
 
 - Expanding everything at once (premature detail)
@@ -142,3 +117,4 @@ This means:
 - **Missing project anchors**: Creating goals/tasks with `project: X` but no `X.md` project file exists
 - **Reflexive task creation**: Creating tasks without knowing the action path
 - **Prose instead of structure**: Writing relationships as prose when they should be graph edges
+- **Fire-and-forget decomposition**: Creating subtasks without a verify-parent task to close the loop

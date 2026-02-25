@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 290
+Total files: 289
 
 ## File Tree
 
@@ -93,7 +93,6 @@ lib/hydration/builder.py
 lib/hydration/context_loaders.py
 lib/hydration/skip_check.py
 lib/insights_generator.py
-lib/knowledge_graph.py
 lib/path_reconstructor.py
 lib/paths.py
 lib/pipeline_metrics.py
