@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 290
+Total files: 289
 
 ## File Tree
 
@@ -114,7 +114,6 @@ lib/template_registry.py
 lib/transcript_error_analyzer.py
 lib/transcript_parser.py
 mcp_servers/__init__.py
-mcp_servers/memory_proxy.py
 pyproject.toml
 scripts/audit_framework_health.py
 scripts/check_orphan_files.py
