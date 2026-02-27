@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 289
+Total files: 291
 
 ## File Tree
 
@@ -180,6 +180,8 @@ skills/excalidraw/references/productivity-tips.md
 skills/excalidraw/references/technical-details.md
 skills/excalidraw/references/text-container-pattern.md
 skills/excalidraw/references/theme-colors.md
+skills/extract/SKILL.md
+skills/extract/workflows/review-inline-comments.md
 skills/flowchart/SKILL.md
 skills/flowchart/references/color-and-styling.md
 skills/flowchart/references/mermaid-techniques.md
@@ -301,9 +303,9 @@ workflows/feature-dev.md
 workflows/framework-gate.md
 workflows/interactive-followup.md
 workflows/peer-review.md
+workflows/pr-review.md
 workflows/qa.md
 workflows/reference-letter.md
 workflows/reflect.md
 workflows/simple-question.md
-workflows/worktree-merge.md
 ```
