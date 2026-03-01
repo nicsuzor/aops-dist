@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 291
+Total files: 293
 
 ## File Tree
 
@@ -75,8 +75,10 @@ hooks/templates/tool-gate-message.md
 hooks/unified_logger.py
 hooks/user_prompt_submit.py
 lib/__init__.py
+lib/agent_env.py
 lib/ascii_tree.py
 lib/axiom_detector.py
+lib/binary_install.py
 lib/commit_check.py
 lib/event_detector.py
 lib/extract_labor.py
