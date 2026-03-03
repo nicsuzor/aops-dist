@@ -12,6 +12,13 @@ tools:
 - pkb__update_task
 - pkb__list_tasks
 - pkb__task_search
+- pkb__search
+- pkb__get_document
+- pkb__create_memory
+- pkb__retrieve_memory
+- pkb__list_memories
+- pkb__search_by_tag
+- pkb__delete_memory
 kind: local
 max_turns: 15
 timeout_mins: 5

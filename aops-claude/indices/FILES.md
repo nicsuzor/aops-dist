@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 292
+Total files: 301
 
 ## File Tree
 
@@ -37,6 +37,7 @@ agents/qa.md
 commands/aops.md
 commands/bump.md
 commands/dump.md
+commands/email.md
 commands/learn.md
 commands/path.md
 commands/pull.md
@@ -307,6 +308,14 @@ workflows/peer-review.md
 workflows/pr-review.md
 workflows/qa.md
 workflows/reference-letter.md
+workflows/references/batch-submission-details.md
+workflows/references/decomposition-patterns.md
+workflows/references/email-capture-details.md
+workflows/references/feature-dev-details.md
+workflows/references/handover-details.md
+workflows/references/meta-details.md
+workflows/references/peer-review-details.md
 workflows/reflect.md
 workflows/simple-question.md
+workflows/worktree-merge.md
 ```
