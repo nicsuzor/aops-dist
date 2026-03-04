@@ -59,16 +59,16 @@ GATE_CONFIGS = [
             ),
         ],
         policies=[
-            # If Closed, Block/Warn ALL tools except always_available.
+            # If Closed, Block/Warn ALL tools except infrastructure.
             # Read-only tools ARE subject to hydration — the intent is to force hydration
             # before ANY exploration. The gate opens JIT when the hydrator is dispatched
             # (via PreToolUse trigger above), so the hydrator's own reads succeed.
-            # Compare with custodiet which excludes ["always_available", "read_only"].
+            # Compare with custodiet which excludes ["infrastructure", "read_only"].
             GatePolicy(
                 condition=GateCondition(
                     current_status=GateStatus.CLOSED,
                     hook_event="PreToolUse",
-                    excluded_tool_categories=["always_available"],
+                    excluded_tool_categories=["infrastructure"],
                 ),
                 verdict=HYDRATION_GATE_MODE,
                 # Brief user-facing summary
@@ -99,9 +99,14 @@ GATE_CONFIGS = [
         ),
         triggers=[
             # Custodiet check -> Reset
+            # PreToolUse is included so the trigger fires (resetting the counter)
+            # BEFORE the policy evaluates. Without it, Agent(custodiet) is itself
+            # blocked when ops >= threshold (deadlock: can't dispatch the agent
+            # that would reset the counter). This mirrors how the hydration gate
+            # opens on PreToolUse for the hydrator so the hydrator call is allowed.
             GateTrigger(
                 condition=GateCondition(
-                    hook_event="^(SubagentStart|SubagentStop)$",
+                    hook_event="^(PreToolUse|SubagentStart|SubagentStop)$",
                     subagent_type_pattern="^(aops-core:)?custodiet$",
                 ),
                 transition=GateTransition(
@@ -112,12 +117,12 @@ GATE_CONFIGS = [
             ),
         ],
         policies=[
-            # Threshold check (except always_available and read_only tools)
+            # Threshold check (except infrastructure and read_only tools)
             GatePolicy(
                 condition=GateCondition(
                     hook_event="PreToolUse",
                     min_ops_since_open=CUSTODIET_TOOL_CALL_THRESHOLD,
-                    excluded_tool_categories=["always_available", "read_only"],
+                    excluded_tool_categories=["infrastructure", "read_only"],
                 ),
                 verdict=CUSTODIET_GATE_MODE,
                 message_template="✕ Compliance check required ({ops_since_open} ops since last check).",

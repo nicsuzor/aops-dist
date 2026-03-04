@@ -31,13 +31,14 @@ backend: scripts
 ## Critical Guardrails
 
 - **Mandatory First Step**: Always check for existing tasks before creation.
+- **Mandatory Parent Linkage**: Every created task MUST have a `parent` (epic or project task).
 - **Verification of Tool**: To check if `~~email` is available, CALL THE TOOL. Don't check configs.
 - **Confidence Scoring**: High confidence auto-categorizes; low confidence flags for review.
 - **Fail-Fast**: Halt immediately if the email connector is unavailable.
 
 ## Detailed Procedures
 
-For step-by-step instructions and technical configurations, see **[[references/email-capture-details]]**:
+For step-by-step instructions and technical configurations, see **[[email-capture-details]]**:
 
 - Detailed duplication check and response detection logic
 - Classification matrix and signal indicators

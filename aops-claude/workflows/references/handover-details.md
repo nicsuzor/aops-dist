@@ -20,11 +20,11 @@ Then **stop** - skip all other steps.
 
 If outstanding work remains, file follow-up tasks using [[decompose]] principles:
 
-- **Group related items** into a single task with bullet points — don't create one task per TODO
-- **Appropriate granularity**: each task should be a coherent work unit (≤4h, single "why"), not an individual checklist item
-- **No reflexive tasks**: only create tasks where the action path is clear
-- **Include context**: body should contain enough for the next agent to resume without re-reading the session
-- **Completion loop (P#109)**: If creating multiple follow-up subtasks under a parent, also create a verify-parent task that depends on all of them to close the loop
+- **Group related items** into a single task with bullet points; don't create one task per TODO.
+- **Granularity**: each task should be a coherent work unit (≤4h, single "why").
+- **No reflexive tasks**: only create tasks where the action path is clear.
+- **Include context**: body should contain enough for the next agent to resume.
+- **Completion loop (P#109)**: If creating multiple follow-up subtasks, also create a verify-parent task.
 
 ```python
 mcp__pkb__create_task(
@@ -51,7 +51,19 @@ mcp__pkb__create_memory(
 
 ## Step 5: Reflection Template (AGENTS.md Format)
 
-Output the reflection in **exact AGENTS.md format**:
+Output the reflection using `## Framework Reflection` as an **H2 heading** — this is critical for the session-insights parser to extract fields. Use `**Field**: value` on each line.
+
+**Minimum** (3 fields — for simple sessions):
+
+```markdown
+## Framework Reflection
+
+**Outcome**: success
+**Accomplishments**: Fixed the repo-sync cron script
+**Next step**: None — PR merged, task complete
+```
+
+**Full** (9 fields — for complex or partial sessions):
 
 ```markdown
 ## Framework Reflection
@@ -67,17 +79,20 @@ Output the reflection in **exact AGENTS.md format**:
 **Next step**: [Exact context for next session to resume, including Task ID]
 ```
 
+> **WARNING**: Do NOT use `**Framework Reflection:**` (bold text) — use `## Framework Reflection` (heading). The bold-text variant is not reliably parsed and results in empty session summaries on the dashboard.
+
 ## Edge Cases
 
 ### No task currently claimed BUT work was completed
 
-CREATE a historical task to capture the session's work:
+CREATE a historical task to capture the session's work (MANDATORY: set `parent` to project task):
 
 ```python
 mcp__pkb__create_task(
   title="[Session] <brief description of work done>",
   type="task",
   project="<relevant project or 'aops'>",
+  parent="<project-id>", # MANDATORY: Link to hierarchy
   status="done",
   priority=3,
   body="Historical task created at /dump.\n\n## Work Completed\n<what was accomplished>\n\n## Outcome\n<success/partial/failed>\n\n## Context\n<any follow-up notes>"
@@ -88,16 +103,6 @@ mcp__pkb__create_task(
 
 When session ends because tooling failed and a bug was filed:
 
-1. **Mark original task as blocked**:
-
-```python
-mcp__pkb__update_task(
-  id="<original-task-id>",
-  status="blocked",
-  depends_on=["<bug-task-id>"]
-)
-```
-
-2. **Reflection outcome**: `partial` with friction point explaining the infrastructure failure
-
-3. **Do NOT leave task as "active"** - blocked tasks should be visible as blocked, not appear claimed
+1. **Mark original task as blocked** via `mcp__pkb__update_task` with `status="blocked"` and `depends_on=["<bug-task-id>"]`.
+2. **Reflection outcome**: `partial` with friction point explaining the failure.
+3. **Do NOT leave task as "active"** - blocked tasks should be visible as blocked.
