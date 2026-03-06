@@ -37,8 +37,18 @@ from typing import Any
 
 TOOL_CATEGORIES: dict[str, set[str]] = {
     # Always available: bypass ALL gates, including hydration.
-    # These are tools that either invoke agents/skills (needed to satisfy gates)
-    # or manage PKB/task state (needed for framework lifecycle).
+    # These are Claude Code built-in meta/control tools that have no substantive
+    # side effects on user data. They must never be blocked — e.g. AskUserQuestion
+    # is needed to communicate with the user during any gate state.
+    # Distinct from infrastructure (PKB ops) and spawn (subagent dispatch).
+    "always_available": {
+        "AskUserQuestion",
+        "ask_user",
+        "TodoWrite",
+        "EnterPlanMode",
+        "ExitPlanMode",
+        "KillShell",
+    },
     # Infrastructure: bypass ALL gates, including hydration.
     # These are tools required for the framework itself to function (PKB ops).
     "infrastructure": {
@@ -127,13 +137,6 @@ TOOL_CATEGORIES: dict[str, set[str]] = {
         "decompose_task",
         "append",
         "save_memory",
-        # --- Claude Code built-in meta tools ---
-        "AskUserQuestion",
-        "ask_user",
-        "TodoWrite",
-        "EnterPlanMode",
-        "ExitPlanMode",
-        "KillShell",
     },
     # Spawn: tools that invoke subagents or skills.
     # Subject to hydration gate (must hydrate before doing substantive work).
@@ -338,30 +341,16 @@ SPAWN_TOOLS: dict[str, tuple[tuple[str, ...], bool]] = {
 }
 
 # =============================================================================
-# GATE MODE DEFAULTS
+# GATE MODES
 # =============================================================================
-# Default enforcement modes for gates. Can be overridden by environment variables.
+# Gate enforcement modes are set by environment variables before the session
+# starts. No fallback defaults — if a var is missing, it's a deployment error.
 
-GATE_MODE_DEFAULTS: dict[str, str] = {
-    "hydration": "warn",
-    "custodiet": "block",
-    "qa": "block",
-    "handover": "warn",
-}
-
-# Environment variable names for gate modes
-GATE_MODE_ENV_VARS: dict[str, str] = {
-    "hydration": "HYDRATION_GATE_MODE",
-    "custodiet": "CUSTODIET_GATE_MODE",
-    "qa": "QA_GATE_MODE",
-    "handover": "HANDOVER_GATE_MODE",
-}
-
-HANDOVER_GATE_MODE = os.getenv(GATE_MODE_ENV_VARS["handover"], GATE_MODE_DEFAULTS["handover"])
-QA_GATE_MODE = os.getenv(GATE_MODE_ENV_VARS["qa"], GATE_MODE_DEFAULTS["qa"])
-CUSTODIET_GATE_MODE = os.getenv(GATE_MODE_ENV_VARS["custodiet"], GATE_MODE_DEFAULTS["custodiet"])
-CUSTODIET_TOOL_CALL_THRESHOLD = int(os.getenv("CUSTODIET_TOOL_CALL_THRESHOLD", 50))
-HYDRATION_GATE_MODE = os.getenv(GATE_MODE_ENV_VARS["hydration"], GATE_MODE_DEFAULTS["hydration"])
+HANDOVER_GATE_MODE = os.environ["HANDOVER_GATE_MODE"]
+QA_GATE_MODE = os.environ["QA_GATE_MODE"]
+CUSTODIET_GATE_MODE = os.environ["CUSTODIET_GATE_MODE"]
+CUSTODIET_TOOL_CALL_THRESHOLD = int(os.environ.get("CUSTODIET_TOOL_CALL_THRESHOLD", "50"))
+HYDRATION_GATE_MODE = os.environ["HYDRATION_GATE_MODE"]
 
 # =============================================================================
 # PKB PREFIX NORMALIZATION
@@ -420,14 +409,38 @@ _PKB_PREFIX_RE = re.compile(r"^(?:mcp__(?:plugin_(?:aops-core_|[\w.]+_))?(?:pkb|
 # =============================================================================
 
 
-def get_tool_category(tool_name: str) -> str:
+def get_tool_category(tool_name: str, tool_input: dict[str, Any] | None = None) -> str:
     """Get the category for a tool.
 
     Lookup order:
-    1. Static TOOL_CATEGORIES sets (O(1) for known tool names)
-    2. PKB prefix normalization (handles unknown MCP prefix variants)
-    3. Default: 'write' (conservative fallback for truly unknown tools)
+    1. ToolSearch with select: prefix -> infrastructure (tool-loading, not new work)
+    2. Compliance agent spawn: spawn tool + compliance subagent_type -> infrastructure
+    3. Static TOOL_CATEGORIES sets (O(1) for known tool names)
+    4. PKB prefix normalization (handles unknown MCP prefix variants)
+    5. Default: 'write' (conservative fallback for truly unknown tools)
+
+    Args:
+        tool_name: The tool being called.
+        tool_input: Optional tool input dict. Used to:
+            - Detect ToolSearch select: queries (infrastructure bypass)
+            - Extract subagent_type for compliance-spawn bypass
     """
+    if tool_input:
+        # ToolSearch with select: prefix is a pure tool-loading operation (infrastructure).
+        # Blocking it creates an unresolvable loop: the agent needs ToolSearch to load
+        # tools, but ToolSearch is blocked until hydration, which also requires tools.
+        if tool_name == "ToolSearch":
+            query = tool_input.get("query", "")
+            if isinstance(query, str) and query.startswith("select:"):
+                return "infrastructure"
+
+        # Compliance agent spawns (Agent/Task + compliance subagent_type) are infrastructure.
+        # This ensures dispatching the hydrator or custodiet is never blocked by any gate,
+        # including custodiet's own ops-threshold policy.
+        extracted_st, _ = extract_subagent_type(tool_name, tool_input)
+        if extracted_st and extracted_st in COMPLIANCE_SUBAGENT_TYPES and tool_name in SPAWN_TOOLS:
+            return "infrastructure"
+
     for category, tools in TOOL_CATEGORIES.items():
         if tool_name in tools:
             return category
