@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 313
+Total files: 325
 
 ## File Tree
 
@@ -61,18 +61,26 @@ hooks/session_env_setup.py
 hooks/templates/README.md
 hooks/templates/custodiet-audit.md
 hooks/templates/custodiet-context.md
+hooks/templates/custodiet-countdown.md
 hooks/templates/custodiet-instruction.md
-hooks/templates/fail-fast-reminder.md
+hooks/templates/custodiet-policy-context.md
+hooks/templates/custodiet-policy-message.md
+hooks/templates/custodiet-verified.md
+hooks/templates/handover-bound.md
+hooks/templates/handover-complete.md
+hooks/templates/handover-policy-message.md
+hooks/templates/hydration-closed.md
 hooks/templates/hydration-gate-block.md
 hooks/templates/hydration-gate-warn.md
-hooks/templates/overdue-enforcement-block.md
+hooks/templates/hydration-opened.md
+hooks/templates/hydration-policy-message.md
 hooks/templates/prompt-hydration-instruction.md
 hooks/templates/prompt-hydrator-context.md
+hooks/templates/qa-complete.md
 hooks/templates/qa-context.md
-hooks/templates/simple-question-instruction.md
+hooks/templates/qa-policy-context.md
+hooks/templates/qa-policy-message.md
 hooks/templates/stop-gate-handover-block.md
-hooks/templates/stop-gate-handover-warn.md
-hooks/templates/tool-gate-message.md
 hooks/unified_logger.py
 hooks/user_prompt_submit.py
 lib/__init__.py
@@ -151,6 +159,10 @@ skills/audit/SKILL.md
 skills/audit/references/acceptance-tests.md
 skills/audit/references/output-targets.md
 skills/audit/references/report-format.md
+skills/briefing-bundle/SKILL.md
+skills/briefing-bundle/references/bundle-template.md
+skills/briefing-bundle/references/coversheet-template.md
+skills/briefing-bundle/references/email-template.md
 skills/convert-to-md/SKILL.md
 skills/convert-to-md/scripts/pdf2md.py
 skills/daily/SKILL.md
@@ -240,6 +252,7 @@ skills/planning/SKILL.md
 skills/planning/references/dependency-types.md
 skills/planning/references/knowledge-flow.md
 skills/planning/references/spike-patterns.md
+skills/process-bundle/SKILL.md
 skills/python-dev/SKILL.md
 skills/python-dev/references/bigquery.md
 skills/python-dev/references/code-quality.md
@@ -258,7 +271,6 @@ skills/qa/references/qa-planning.md
 skills/qa/references/qualitative-assessment.md
 skills/qa/references/quick-verification.md
 skills/qa/references/system-design-qa.md
-skills/relax/skill.md
 skills/remember/SKILL.md
 skills/remember/procedures/capture.md
 skills/remember/procedures/prune.md

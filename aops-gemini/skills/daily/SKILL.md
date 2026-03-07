@@ -26,6 +26,15 @@ Location: `$ACA_DATA/daily/YYYYMMDD-daily.md`
 
 **User stating a priority ≠ authorization to execute that priority.**
 
+## Relationship to Briefing Bundle
+
+The daily note and the briefing bundle are **two separate documents with different jobs**:
+
+- **Daily note** (`/daily`): Living progress tracker. Surfaces priorities, triages email, syncs sessions. Answers "what's going on?"
+- **Briefing bundle** (`/bundle`): Morning-only decision brief. Reads the daily note, adds editorial judgment (coversheets, email drafts, recommendations with annotation targets). Answers "what do I need to decide?"
+
+**The daily note should NOT**: write coversheets, draft emails, make recommendations with annotation targets, or produce self-contained decision items. Those are the bundle's job. See [[specs/daily-briefing-bundle.md]].
+
 ## Invocation
 
 Every `/daily` invocation runs the **full pipeline** and updates the daily note in place. There are no separate modes — the skill is designed to be run repeatedly throughout the day.
@@ -35,7 +44,7 @@ Every `/daily` invocation runs the **full pipeline** and updates the daily note 
 /daily sync     # Alias — same behavior, kept for muscle memory
 ```
 
-**Pipeline**: 1 (create if missing) → 1.5 (mobile capture triage) → 2 (email briefing) → 3 (focus & recommendations, incl. PR verification sweep) → 4 (progress sync & merged PRs) → 5 (work summary)
+**Pipeline**: 1 (create if missing) → 1.5 (mobile capture triage) → 2 (email briefing) → 3 (focus & recommendations) → 4 (progress sync & merged PRs) → 5 (work summary)
 
 **Idempotent updates**: Each section is updated in place using the Edit tool. User-written content is **never deleted**:
 
@@ -47,20 +56,19 @@ Every `/daily` invocation runs the **full pipeline** and updates the daily note 
 
 ## Section Ownership
 
-| Section                 | Owner    | Updated By                                 |
-| ----------------------- | -------- | ------------------------------------------ |
-| Mobile Captures         | `/daily` | Triage from notes/mobile-captures (mixed)  |
-| Focus                   | `/daily` | Task data + user priorities (mixed)        |
-| PR Verification         | `/daily` | PR status sweep for review tasks (machine) |
-| Task Tree               | `/daily` | Task hierarchy snapshot (machine)          |
-| Today's Story           | `/daily` | Synthesis from merges + sessions + tasks   |
-| FYI                     | `/daily` | Email triage (mixed)                       |
-| Merged PRs              | `/daily` | GitHub API query (machine)                 |
-| Open PRs                | `/daily` | GitHub API query (machine)                 |
-| Session Log/Timeline    | `/daily` | Session JSON synthesis (machine)           |
-| Project Accomplishments | `/daily` | Session JSON synthesis (mixed)             |
-| Reflection              | `/daily` | Goals vs achieved analysis (machine)       |
-| Abandoned Todos         | `/daily` | End-of-day (user)                          |
+| Section                 | Owner    | Updated By                                |
+| ----------------------- | -------- | ----------------------------------------- |
+| Mobile Captures         | `/daily` | Triage from notes/mobile-captures (mixed) |
+| Focus                   | `/daily` | Task data + user priorities (mixed)       |
+| Task Tree               | `/daily` | Task hierarchy snapshot (machine)         |
+| Today's Story           | `/daily` | Synthesis from merges + sessions + tasks  |
+| FYI                     | `/daily` | Email triage (mixed)                      |
+| Merged PRs              | `/daily` | GitHub API query (machine)                |
+| Open PRs                | `/daily` | GitHub API query (machine)                |
+| Session Log/Timeline    | `/daily` | Session JSON synthesis (machine)          |
+| Project Accomplishments | `/daily` | Session JSON synthesis (mixed)            |
+| Reflection              | `/daily` | Goals vs achieved analysis (machine)      |
+| Abandoned Todos         | `/daily` | End-of-day (user)                         |
 
 ## Formatting Rules
 
