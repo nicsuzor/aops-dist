@@ -12,7 +12,7 @@ Auto-generated during build. Lists all files in this plugin distribution.
 
 ## File Count
 
-Total files: 324
+Total files: 326
 
 ## File Tree
 
@@ -57,6 +57,8 @@ hooks/schemas.py
 hooks/session_end_commit_check.py
 hooks/session_env_setup.py
 hooks/templates/README.md
+hooks/templates/commit-uncommitted-block.md
+hooks/templates/commit-unpushed-reminder.md
 hooks/templates/custodiet-audit.md
 hooks/templates/custodiet-context.md
 hooks/templates/custodiet-countdown.md

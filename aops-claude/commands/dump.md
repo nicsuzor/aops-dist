@@ -1,7 +1,19 @@
 ---
 name: dump
+type: command
 category: instruction
-description: Session handover - commit changes, update task, file follow-ups, output Framework Reflection, halt
+description: Comprehensive work handover and session closure - commit changes, push, file a Pull Request, update tasks, file follow-ups, output Framework Reflection, halt
+triggers:
+  - "emergency handoff"
+  - "save work"
+  - "interrupted"
+  - "session end"
+  - "stop hook blocked"
+modifies_files: true
+needs_task: true
+mode: execution
+domain:
+  - operations
 allowed-tools: Bash, mcp__pkb__create_memory, mcp__pkb__update_task, mcp__pkb__create_task, TodoWrite, AskUserQuestion, Read
 permalink: commands/dump
 ---
@@ -34,7 +46,7 @@ This command is **mandatory** before session end. The framework stop gate blocks
 
 Execute the [[base-handover]] workflow. The steps are:
 
-1. **Commit and push all work** (MANDATORY per P#24)
+1. **Commit, push, and file a Pull Request** (MANDATORY per P#24)
 2. **Update task with progress** (or create historical task if none claimed)
 3. **File follow-up tasks** for outstanding work — use [[decompose]] principles and ensure all have a **parent** set to the current task or epic
 4. **Persist discoveries to memory** (optional)
@@ -42,7 +54,7 @@ Execute the [[base-handover]] workflow. The steps are:
 5. **Output Framework Reflection** (include `**Proposed changes**` field referencing what was filed/updated)
 6. **Output Summary to user** — LAST step, after everything else (see format below)
 
-> **CRITICAL**: Do not proceed past Step 1 until ALL changes are committed and pushed. The only acceptable reason to skip is if you made NO file changes.
+> **CRITICAL**: Do not proceed past Step 1 until ALL changes are committed, pushed, and a Pull Request is filed. The only acceptable reason to skip is if you made NO file changes.
 
 ## Framework Reflection Format
 

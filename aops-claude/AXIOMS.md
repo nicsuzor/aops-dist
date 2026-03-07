@@ -85,7 +85,7 @@ Skills MUST NOT contain dynamic data. All mutable state lives in $ACA_DATA.
 
 ## Trust Version Control (P#24)
 
-Git is the backup system. NEVER create backup files (`.bak`, `_old`, `_ARCHIVED_*`). Edit directly, rely on git. Commit AND push after completing logical work units. Commit promptly — no hesitation.
+Git is the backup system. NEVER create backup files (`.bak`, `_old`, `_ARCHIVED_*`). Edit directly, rely on git. Commit, PUSH, AND file a Pull Request after completing logical work units. Commit promptly — no hesitation.
 
 **Corollaries**:
 
@@ -195,6 +195,12 @@ Before generating insights, search existing knowledge. Memory is read-then-write
 - The `/remember` skill's mandatory "search first" step is the model for all knowledge-generating agents.
 
 **Derivation**: Knowledge accumulates across sessions. An agent that writes without reading produces a siloed write-only memory. Checking existing context before synthesis grounds new thinking in what is already known.
+
+## Academic Output Quality (P#53)
+
+Nothing goes out to the public before it's perfect. All academic output (reports, papers, deliverables) must be triple-checked and presented to the user for explicit approval with full receipts before release. This applies to any stakeholder-facing deliverable.
+
+**Derivation**: Academic reputation is built on precision and rigor. Silent or unverified releases risk the user's credibility. Human-in-the-loop with evidence is the mandatory quality gate for public-facing work.
 
 ## Delegated Authority Only (P#99)
 
